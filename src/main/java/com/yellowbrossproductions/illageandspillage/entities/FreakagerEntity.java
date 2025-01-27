@@ -526,7 +526,9 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                 ragno = ragnolist.get(0);
                 if (!ragno.isAnticheese()) {
                     ragno.setStunned(false);
-                    ragno.stopAttacking();
+                    ragno.setAttackType(0);
+                    ragno.setAttackTicks(0);
+                    ragno.setAnimationState(0);
                     ragno.setAnticheese(true);
                 }
                 if (this.isPhasedOut() && !this.level().isClientSide) {

@@ -6,6 +6,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -41,11 +43,15 @@ public class MobFollowingSoundPacket {
 
     public static void handle(MobFollowingSoundPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            if (Minecraft.getInstance().level != null) {
-                Entity entity = Minecraft.getInstance().level.getEntity(msg.entityId);
-                if (entity != null && msg.sound != null) {
-                    Minecraft.getInstance().getSoundManager().play(new MobFollowingSound(entity, msg.sound, msg.volume, msg.pitch, msg.loop));
-                }
+            if (ctx.get().getDirection().getReceptionSide().isClient()) {
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                    if (Minecraft.getInstance().level != null) {
+                        Entity entity = Minecraft.getInstance().level.getEntity(msg.entityId);
+                        if (entity != null && msg.sound != null) {
+                            Minecraft.getInstance().getSoundManager().play(new MobFollowingSound(entity, msg.sound, msg.volume, msg.pitch, msg.loop));
+                        }
+                    }
+                });
             }
         });
         ctx.get().setPacketHandled(true);

@@ -998,7 +998,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                 }
             }
 
-            if (((!this.isCrazy() && this.getOwner() instanceof FreakagerEntity && ((FreakagerEntity) this.getOwner()).halfHealth()) || (this.isCrazy() && this.halfHealth())) && ((this.doesAttackMeetNormalRequirements() && this.getRandom().nextInt(16) == 0 && this.jumpCooldown < 1) || getAttackType() == JUMP_ATTACK)) {
+            if (((!this.isCrazy() && this.getOwner() instanceof FreakagerEntity && ((FreakagerEntity) this.getOwner()).halfHealth()) || (this.isCrazy() && this.halfHealth())) && ((this.doesAttackMeetNormalRequirements() && this.getRandom().nextInt(16) == 0 && this.jumpCooldown < 1) || this.getAttackType() == JUMP_ATTACK)) {
                 if (this.getAttackTicks() == 0) {
                     this.setAttackType(JUMP_ATTACK);
                     this.setAnimationState(14);
@@ -1056,7 +1056,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     }
                 }
 
-                if (RagnoEntity.this.getAttackTicks() > 107 || (this.getAttackTicks() > 8 && this.onGround())) {
+                if (this.getAttackTicks() > 8 && this.onGround()) {
                     for (Entity hit : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
                         if (EntityUtil.canHurtThisMob(hit, this) && hit instanceof LivingEntity && hit.isAlive() && hit != this) {
                             double deltaX = this.getX() - hit.getX();
@@ -1078,6 +1078,15 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     EntityUtil.makeCircleParticles(this.level(), this, ParticleTypes.LARGE_SMOKE, 100, 1.0D, 1.0F);
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_SLAM.get(), 2.0F, 1.5F);
                     this.setAnimationState(15);
+                    this.setAttackTicks(0);
+                    if (this.isCrazy()) this.loseStunHealth(5, false);
+                    this.attackCooldown = 10;
+                    this.jumpCooldown = 80;
+                    this.setAttackType(0);
+                }
+
+                if (this.getAttackTicks() > 107 && this.getAttackType() == JUMP_ATTACK) {
+                    this.setAnimationState(0);
                     this.setAttackTicks(0);
                     if (this.isCrazy()) this.loseStunHealth(5, false);
                     this.attackCooldown = 10;
