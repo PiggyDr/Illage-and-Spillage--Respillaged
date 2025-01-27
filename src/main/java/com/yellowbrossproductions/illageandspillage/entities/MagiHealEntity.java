@@ -36,6 +36,10 @@ public class MagiHealEntity extends PathfinderMob implements IllagerAttack {
         super.readAdditionalSaveData(p_21815_);
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean canBeAffected(MobEffectInstance p_21197_) {
         return false;
     }

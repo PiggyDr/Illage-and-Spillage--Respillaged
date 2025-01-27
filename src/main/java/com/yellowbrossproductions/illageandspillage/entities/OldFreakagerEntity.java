@@ -695,7 +695,7 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
                             this.setShowScythe(false);
                         }
 
-                        ScytheEntity scythe = ModEntityTypes.Scythe.get().create(this.level());
+                        OldScytheEntity scythe = ModEntityTypes.OldScythe.get().create(this.level());
 
                         assert scythe != null;
 
@@ -712,7 +712,6 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
                         scythe.halfHealth = this.getHealth() < this.getMaxHealth() / 2.0F;
                         scythe.setGoFor(entity);
                         scythe.setShooter(this);
-                        scythe.setOld(true);
                         this.level().addFreshEntity(scythe);
                     }
                 }

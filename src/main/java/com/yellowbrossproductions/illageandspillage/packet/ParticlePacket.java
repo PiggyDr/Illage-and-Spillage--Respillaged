@@ -63,57 +63,12 @@ public class ParticlePacket {
         this.queuedParticles.add(new QueuedParticle(particleOptions, b, xyz.x, xyz.y, xyz.z, xyz2.x, xyz2.y, xyz2.z));
     }
 
-    private static record QueuedParticle(ParticleOptions particleOptions, boolean b, double x, double y, double z,
-                                         double x2, double y2, double z2) {
-        private QueuedParticle(ParticleOptions particleOptions, boolean b, double x, double y, double z, double x2, double y2, double z2) {
-            this.particleOptions = particleOptions;
-            this.b = b;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.x2 = x2;
-            this.y2 = y2;
-            this.z2 = z2;
-        }
-
-        public ParticleOptions particleOptions() {
-            return this.particleOptions;
-        }
-
-        public boolean b() {
-            return this.b;
-        }
-
-        public double x() {
-            return this.x;
-        }
-
-        public double y() {
-            return this.y;
-        }
-
-        public double z() {
-            return this.z;
-        }
-
-        public double x2() {
-            return this.x2;
-        }
-
-        public double y2() {
-            return this.y2;
-        }
-
-        public double z2() {
-            return this.z2;
-        }
+    private record QueuedParticle(ParticleOptions particleOptions, boolean b, double x, double y, double z, double x2,
+                                  double y2, double z2) {
     }
 
     public static class Handler {
-        public Handler() {
-        }
-
-        public static boolean onMessage(ParticlePacket message, Supplier<NetworkEvent.Context> ctx) {
+        public static void onMessage(ParticlePacket message, Supplier<NetworkEvent.Context> ctx) {
             (ctx.get()).enqueueWork(() -> {
                 ClientLevel level = Minecraft.getInstance().level;
                 if (level != null) {
@@ -124,7 +79,6 @@ public class ParticlePacket {
                 }
             });
             (ctx.get()).setPacketHandled(true);
-            return true;
         }
     }
 }

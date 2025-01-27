@@ -1,14 +1,18 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
-import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
+import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
+import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.DifficultyInstance;
@@ -28,6 +32,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -38,6 +44,8 @@ public class PreserverEntity extends AbstractIllager {
     private static final EntityDataAccessor<Integer> JUMP_ANIM_TICKS;
     private LivingEntity thingToProtect = null;
     private int cooldownTime;
+    private LivingEntity entityToParticle;
+    private int tickCountWhenProtected;
 
     public PreserverEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
@@ -70,16 +78,11 @@ public class PreserverEntity extends AbstractIllager {
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
         if (this.isTryingToProtect()) {
             if (this.getThingToProtect() != null && this.getThingToProtect().isAlive() && this.getThingToProtect().distanceToSqr(this) < 6.0) {
-                HayArmorEntity hayArmor = ModEntityTypes.HayArmor.get().create(this.level());
-
-                assert hayArmor != null;
-
-                hayArmor.setOwner(this.getThingToProtect());
-                hayArmor.setPos(this.getThingToProtect().getX(), this.getThingToProtect().getY(), this.getThingToProtect().getZ());
-                this.level().addFreshEntity(hayArmor);
                 this.getThingToProtect().addEffect(new MobEffectInstance(EffectRegisterer.PRESERVED.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false));
             }
 
+            this.entityToParticle = this.getThingToProtect();
+            this.tickCountWhenProtected = this.getThingToProtect().tickCount;
             this.setTryingToProtect(false);
             this.playSound(IllageAndSpillageSoundEvents.ENTITY_PRESERVER_LAND.get(), 1.0F, 1.0F);
             if (!this.level().isClientSide) {
@@ -97,6 +100,24 @@ public class PreserverEntity extends AbstractIllager {
 
     public void tick() {
         super.tick();
+
+        if (this.entityToParticle != null && !this.entityToParticle.level().isClientSide && this.entityToParticle.tickCount - 10 < this.tickCountWhenProtected) {
+            for (ServerPlayer serverPlayer : ((ServerLevel) this.level()).players()) {
+                if (serverPlayer.distanceToSqr(this.entityToParticle) < 4096.0D) {
+                    ParticlePacket packet = new ParticlePacket();
+
+                    for (int i = 0; i < 10; i++) {
+                        double d0 = (-0.5 + this.entityToParticle.getRandom().nextGaussian()) / 4.0;
+                        double d1 = (-0.5 + this.entityToParticle.getRandom().nextGaussian()) / 4.0;
+                        double d2 = (-0.5 + this.entityToParticle.getRandom().nextGaussian()) / 4.0;
+                        packet.queueParticle(ParticleTypes.EXPLOSION, false, new Vec3(this.entityToParticle.getRandomX(1.0), this.entityToParticle.getRandomY() + 1.0, this.entityToParticle.getRandomZ(1.0)), new Vec3(d0, d1, d2));
+                    }
+
+                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), packet);
+                }
+            }
+        }
+
         if (this.cooldownTime > 0) {
             --this.cooldownTime;
         }
@@ -180,7 +201,7 @@ public class PreserverEntity extends AbstractIllager {
     }
 
     public boolean isSomethingProtectableNearby() {
-        return !this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(12.0), (predicate) -> (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, this) && !(IllageAndSpillageConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId())).isEmpty();
+        return !this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(12.0), (predicate) -> !(predicate instanceof IllagerAttack) && !(predicate instanceof EngineerMachine) && !(predicate instanceof FactoryMinion) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, this) && !(IllageAndSpillageConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId())).isEmpty();
     }
 
     protected float getStandingEyeHeight(Pose p_21131_, EntityDimensions p_21132_) {
@@ -206,7 +227,7 @@ public class PreserverEntity extends AbstractIllager {
         }
 
         public void start() {
-            List<Raider> list = PreserverEntity.this.level().getEntitiesOfClass(Raider.class, PreserverEntity.this.getBoundingBox().inflate(6.0), (predicate) -> !(predicate instanceof IllagerAttack) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && PreserverEntity.this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, PreserverEntity.this) && !(IllageAndSpillageConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId()));
+            List<Raider> list = PreserverEntity.this.level().getEntitiesOfClass(Raider.class, PreserverEntity.this.getBoundingBox().inflate(6.0), (predicate) -> !(predicate instanceof IllagerAttack) && !(predicate instanceof EngineerMachine) && !(predicate instanceof FactoryMinion) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && PreserverEntity.this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, PreserverEntity.this) && !(IllageAndSpillageConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId()));
             if (!list.isEmpty()) {
                 LivingEntity thing = list.get(PreserverEntity.this.random.nextInt(list.size()));
                 PreserverEntity.this.setThingToProtect(thing);

@@ -35,6 +35,7 @@ public class IllageAndSpillage {
     public IllageAndSpillage() {
         PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
 //        BlockRegisterer.blockInit();
         ItemRegisterer.itemInit();
         ModEntityTypes.ENTITY_TYPES.register(modEventBus);

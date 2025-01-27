@@ -19,7 +19,7 @@ public class Config {
 
     public static void loadConfig(ForgeConfigSpec config, String path) {
         IllageAndSpillage.LOGGER.info("Loading config: " + path);
-        CommentedFileConfig file = (CommentedFileConfig)CommentedFileConfig.builder(new File(path)).sync().autosave().writingMode(WritingMode.REPLACE).build();
+        CommentedFileConfig file = CommentedFileConfig.builder(new File(path)).sync().autosave().writingMode(WritingMode.REPLACE).build();
         IllageAndSpillage.LOGGER.info("Built config: " + path);
         file.load();
         IllageAndSpillage.LOGGER.info("Loaded config: " + path);

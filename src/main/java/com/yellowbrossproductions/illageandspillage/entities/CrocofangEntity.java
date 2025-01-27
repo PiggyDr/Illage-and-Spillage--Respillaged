@@ -2,6 +2,8 @@ package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.packet.MobFollowingSoundPacket;
+import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.BlockPos;
@@ -36,6 +38,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
@@ -164,7 +167,7 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
 
     public void tick() {
         super.tick();
-        if (!this.hasAlreadyTriedSpawn()) {
+        if (!IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get() && !this.hasAlreadyTriedSpawn()) {
             if (this.getPassengers().isEmpty()) {
                 this.spawnMob();
             }
@@ -216,13 +219,15 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
                     double motionX = this.getDeltaMovement().x - chargeX / charged * (double) power * 0.2;
                     double motionZ = this.getDeltaMovement().z - chargeZ / charged * (double) power * 0.2;
                     if (this.chargeTime == 30) {
-                        this.playSound(IllageAndSpillageSoundEvents.ENTITY_CROCOFANG_CHARGE.get(), 3.0F, 1.0F);
-                        this.setAnimationState(3);
                         if (!this.level().isClientSide) {
                             this.setCharging(true);
                         }
-
+                        this.setAnimationState(3);
                         this.setCharge(motionX, motionZ);
+                    }
+
+                    if (this.chargeTime == 31) {
+                        EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_CROCOFANG_CHARGE.get(), 3.0F, 1.0F, false);
                     }
 
                     if (this.chargeTime > 30 && this.chargeTime <= 64) {
@@ -443,7 +448,7 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
 
         public void tick() {
             CrocofangEntity.this.getNavigation().stop();
-            if (CrocofangEntity.this.getTarget() != null) {
+            if (CrocofangEntity.this.getTarget() != null && CrocofangEntity.this.chargeTime < 30) {
                 CrocofangEntity.this.getLookControl().setLookAt(CrocofangEntity.this.getTarget(), 100.0F, 100.0F);
             }
 

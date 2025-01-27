@@ -40,6 +40,10 @@ public class PumpkinBombEntity extends PathfinderMob implements IllagerAttack {
         this.entityData.define(GOOPY, false);
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean getGoopy() {
         return this.entityData.get(GOOPY);
     }

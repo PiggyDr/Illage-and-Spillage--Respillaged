@@ -14,7 +14,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -25,7 +24,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.AngerLevel;
 import net.minecraft.world.entity.monster.warden.Warden;
-import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +32,7 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.Iterator;
 import java.util.List;
 
-public class TrickOrTreatEntity extends Raider implements IllagerAttack {
+public class TrickOrTreatEntity extends PathfinderMob implements IllagerAttack {
     private static final EntityDataAccessor<Integer> TREAT;
     private static final EntityDataAccessor<Boolean> BOUNCE;
     private static final EntityDataAccessor<Boolean> GOOPY;
@@ -46,13 +44,13 @@ public class TrickOrTreatEntity extends Raider implements IllagerAttack {
     public double accelerationY;
     public double accelerationZ;
 
-    public TrickOrTreatEntity(EntityType<? extends Raider> p_21683_, Level p_21684_) {
+    public TrickOrTreatEntity(EntityType<? extends PathfinderMob> p_21683_, Level p_21684_) {
         super(p_21683_, p_21684_);
         this.xpReward = 0;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 6.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
     }
 
     public float getStepHeight() {
@@ -65,9 +63,6 @@ public class TrickOrTreatEntity extends Raider implements IllagerAttack {
         this.entityData.define(BOUNCE, false);
         this.entityData.define(GOOPY, false);
         this.entityData.define(OLD, false);
-    }
-
-    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
     }
 
     public boolean getBounce() {
@@ -104,28 +99,12 @@ public class TrickOrTreatEntity extends Raider implements IllagerAttack {
         this.setTreat(p_21450_.getInt("Treat"));
     }
 
-    public SoundEvent getCelebrateSound() {
-        return null;
-    }
-
-    public boolean canJoinRaid() {
-        return false;
-    }
-
-    public boolean canBeLeader() {
-        return false;
-    }
-
-    public boolean canBeAffected(MobEffectInstance p_21197_) {
-        return (p_21197_.getEffect() != EffectRegisterer.MUTATION.get() || this.isOld()) && super.canBeAffected(p_21197_);
-    }
-
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
         return this.isOld() && super.causeFallDamage(p_147187_, p_147188_, p_147189_);
     }
 
-    public boolean hurt(DamageSource p_37849_, float p_37850_) {
-        return ((this.owner == null || p_37849_.getEntity() != this.owner) || this.isOld()) && super.hurt(p_37849_, p_37850_);
+    public boolean canBeAffected(MobEffectInstance p_21197_) {
+        return (this.isOld() || !this.getGoopy() || p_21197_.getEffect() != EffectRegisterer.MUTATION.get()) && super.canBeAffected(p_21197_);
     }
 
     public void tick() {

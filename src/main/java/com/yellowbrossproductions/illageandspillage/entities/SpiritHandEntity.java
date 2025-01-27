@@ -65,6 +65,10 @@ public class SpiritHandEntity extends PathfinderMob implements IllagerAttack {
         return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 20.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(GOOD_OR_EVIL, true);

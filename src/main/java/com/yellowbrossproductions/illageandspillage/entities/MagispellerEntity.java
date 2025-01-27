@@ -88,6 +88,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     private static final EntityDataAccessor<Boolean> BALLOON;
     private static final EntityDataAccessor<Boolean> DEATH;
     private static final EntityDataAccessor<Integer> ANIMATION_STATE;
+    private static final EntityDataAccessor<Integer> ATTACK_TYPE;
+    private static final EntityDataAccessor<Integer> ATTACK_TICKS;
     public AnimationState fireballAnimationState = new AnimationState();
     public AnimationState lifestealAnimationState = new AnimationState();
     public AnimationState fakersAnimationState = new AnimationState();
@@ -100,8 +102,6 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     public AnimationState knockbackAnimationState = new AnimationState();
     public AnimationState kaboomerAnimationState = new AnimationState();
     public AnimationState deathAnimationState = new AnimationState();
-    private int attackTicks;
-    private int attackType;
     private int fireballCooldown;
     private int lifestealCooldown;
     private int fakersCooldown;
@@ -188,7 +188,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 250.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.magispeller_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
     }
 
     protected void customServerAiStep() {
@@ -214,6 +214,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         this.entityData.define(SHOULD_DELETE_ITSELF, false);
         this.entityData.define(ACTIVE, false);
         this.entityData.define(ANIMATION_STATE, 0);
+        this.entityData.define(ATTACK_TYPE, 0);
+        this.entityData.define(ATTACK_TICKS, 0);
         this.entityData.define(SHOW_ARMS, false);
         this.entityData.define(GLOW_STATE, 0);
         this.entityData.define(SHAKE_AMOUNT, 0);
@@ -242,6 +244,22 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
     public void setShakeAmount(int shake) {
         this.entityData.set(SHAKE_AMOUNT, shake);
+    }
+
+    public int getAttackType() {
+        return this.entityData.get(ATTACK_TYPE);
+    }
+
+    public void setAttackType(int attackType) {
+        this.entityData.set(ATTACK_TYPE, attackType);
+    }
+
+    public int getAttackTicks() {
+        return this.entityData.get(ATTACK_TICKS);
+    }
+
+    public void setAttackTicks(int attackTicks) {
+        this.entityData.set(ATTACK_TICKS, attackTicks);
     }
 
     public boolean isFaking() {
@@ -334,7 +352,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 this.setIllagersNearby(!list.isEmpty());
             }
 
-            if (!list.isEmpty()) {
+            if (this.areIllagersNearby()) {
                 this.setTarget(null);
             }
         }
@@ -368,13 +386,13 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
             }
         }
 
-        if (this.attackType > 0) {
-            ++this.attackTicks;
+        if (this.getAttackType() > 0) {
+            this.setAttackTicks(this.getAttackTicks() + 1);
         } else {
-            this.attackTicks = 0;
+            this.setAttackTicks(0);
         }
 
-        if (this.attackType == 0) {
+        if (this.getAttackType() == 0) {
             if (this.fireballCooldown > 0) {
                 --this.fireballCooldown;
             }
@@ -449,9 +467,9 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         LivingEntity entity;
         float f1;
         if (this.isAlive()) {
-            if (this.attackType == this.FIREBALL_ATTACK) {
+            if (this.getAttackType() == this.FIREBALL_ATTACK) {
                 entity = this.getTarget();
-                if (this.attackTicks == 8) {
+                if (this.getAttackTicks() == 8) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_FIREBALL_START.get(), 2.0F, 1.0F);
                     this.makeFireParticles();
                     CameraShakeEntity.cameraShake(this.level(), this.position(), 30.0F, 0.3F, 0, 15);
@@ -462,7 +480,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     this.setLeftHanded(true);
                 }
 
-                if (this.attackTicks == 14) {
+                if (this.getAttackTicks() == 14) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_FIREBALL.get(), 2.0F, 1.0F);
                     if (!this.level().isClientSide) {
                         this.fireball = new MagiFireballEntity(ModEntityTypes.MagiFireball.get(), this.level());
@@ -470,7 +488,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     }
                 }
 
-                if (this.fireball != null && this.attackTicks < 58) {
+                if (this.fireball != null && this.getAttackTicks() < 58) {
                     f1 = 1.1F;
                     x = this.getX() + 0.800000011920929 * Math.sin((double) (-this.getYRot()) * Math.PI / 180.0) + (double) f1 * Math.sin((double) (-this.yHeadRot) * Math.PI / 180.0) * Math.cos((double) (-this.getXRot()) * Math.PI / 180.0);
                     y = this.getY() + 1.3 + (double) f1 * Math.sin((double) (-this.getXRot()) * Math.PI / 180.0);
@@ -480,11 +498,11 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     this.fireball.setMagispeller(this);
                 }
 
-                if (this.attackTicks == 55) {
+                if (this.getAttackTicks() == 55) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_SWING_BAT.get(), 2.0F, 1.0F);
                 }
 
-                if (this.attackTicks == 58) {
+                if (this.getAttackTicks() == 58) {
                     this.makeFireParticles();
                     if (!this.level().isClientSide) {
                         this.setGlowState(0);
@@ -502,15 +520,15 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
             double motionY;
             double motionZ;
             Entity entity1;
-            if (this.attackType == this.LIFESTEAL_ATTACK) {
-                if (this.attackTicks < 30) {
+            if (this.getAttackType() == this.LIFESTEAL_ATTACK) {
+                if (this.getAttackTicks() < 30) {
                     this.makeLifestealParticles1();
                     if (!this.level().isClientSide) {
                         this.setGlowState(this.random.nextBoolean() ? 0 : 2);
                     }
                 }
 
-                if (this.attackTicks == 31) {
+                if (this.getAttackTicks() == 31) {
                     if (!this.level().isClientSide) {
                         this.setGlowState(2);
                     }
@@ -518,13 +536,13 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     this.pullPower = 0;
                 }
 
-                if (this.attackTicks == 36) {
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_LIFESTEAL.get(), 2.0F, 1.0F);
+                if (this.getAttackTicks() == 36) {
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_LIFESTEAL.get(), 2.0F, 1.0F, false);
                 }
 
-                if (this.attackTicks >= 36) {
+                if (this.getAttackTicks() >= 36) {
                     ++this.pullPower;
-                    if (!this.level().isClientSide && this.attackTicks % 3 == 1) {
+                    if (!this.level().isClientSide && this.getAttackTicks() % 3 == 1) {
                         this.setShakeAmount(this.getShakeAmount() + 1);
                     }
 
@@ -566,27 +584,27 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 }
             }
 
-            if (this.attackType == this.FAKERS_ATTACK) {
-                if (this.attackTicks < 43) {
-                    if (!this.level().isClientSide && this.attackTicks % 3 == 1) {
+            if (this.getAttackType() == this.FAKERS_ATTACK) {
+                if (this.getAttackTicks() < 43) {
+                    if (!this.level().isClientSide && this.getAttackTicks() % 3 == 1) {
                         this.setShakeAmount(this.getShakeAmount() + 1);
                     }
 
                     this.makeFakerParticles();
-                } else if (this.attackTicks <= 48) {
+                } else if (this.getAttackTicks() <= 48) {
                     if (!this.level().isClientSide) {
                         this.setShakeAmount(this.getShakeAmount() / 5);
                     }
-                } else if (this.attackTicks == 49 && !this.level().isClientSide) {
+                } else if (this.getAttackTicks() == 49 && !this.level().isClientSide) {
                     this.setShakeAmount(0);
                 }
 
-                if (this.attackTicks == 16 && !this.level().isClientSide) {
+                if (this.getAttackTicks() == 16 && !this.level().isClientSide) {
                     this.setGlowState(3);
                 }
             }
 
-            if (this.attackType == this.VEXES_ATTACK && this.attackTicks == 20) {
+            if (this.getAttackType() == this.VEXES_ATTACK && this.getAttackTicks() == 20) {
                 this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_CAST_SPELL.get(), 1.0F, 1.0F);
                 if (!this.level().isClientSide) {
                     ServerLevel serverworld = (ServerLevel) this.level();
@@ -604,7 +622,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                             this.level().getScoreboard().addPlayerToTeam(vex.getStringUUID(), this.level().getScoreboard().getPlayerTeam(this.getTeam().getName()));
                         }
 
-                        (Objects.requireNonNull(vex.getAttribute(Attributes.MAX_HEALTH))).setBaseValue(1.0);
+                        (Objects.requireNonNull(vex.getAttribute(Attributes.MAX_HEALTH))).setBaseValue(2.0);
                         vex.setLimitedLife(100);
                         vex.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
                         vex.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
@@ -613,26 +631,24 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 }
             }
 
-            if (this.attackType == this.FANGRUN_ATTACK) {
-                if (this.attackTicks >= 6 && this.attackTicks < 49) {
+            if (this.getAttackType() == this.FANGRUN_ATTACK) {
+                if (this.getAttackTicks() >= 6 && this.getAttackTicks() < 49) {
                     if (this.getShakeAmount() > 0 && !this.level().isClientSide) {
                         this.setShakeAmount(this.getShakeAmount() - 1);
                     }
 
                     this.createFangs(false);
-                    if (this.attackTicks == 6) {
+                    if (this.getAttackTicks() == 6) {
                         this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_FANGRUN_START.get(), 1.0F, 1.0F);
-                        this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_FANGRUN.get(), 2.0F, 1.0F);
+                        EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_FANGRUN.get(), 2.0F, 1.0F, false);
                         this.makeFangRunParticles();
                         CameraShakeEntity.cameraShake(this.level(), this.position(), 30.0F, 0.3F, 0, 20);
                         if (!this.level().isClientSide) {
                             this.setGlowState(4);
                         }
 
-                        var2 = this.level().getEntities(this, this.getBoundingBox().inflate(15.0)).iterator();
-
-                        while (var2.hasNext()) {
-                            entity1 = (Entity) var2.next();
+                        for (Entity value : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
+                            entity1 = value;
                             if (EntityUtil.canHurtThisMob(entity1, this) && entity1.isAlive()) {
                                 x = this.getX() - entity1.getX();
                                 y = this.getY() - entity1.getY();
@@ -648,13 +664,12 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     }
                 }
 
-                if (this.attackTicks >= 49) {
+                if (this.getAttackTicks() >= 49) {
                     this.createFangs(true);
                     this.playSound(SoundEvents.EVOKER_FANGS_ATTACK, 1.0F, this.getVoicePitch());
-                    var2 = this.level().getEntities(this, this.getBoundingBox().inflate(15.0)).iterator();
 
-                    while (var2.hasNext()) {
-                        entity1 = (Entity) var2.next();
+                    for (Entity value : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
+                        entity1 = value;
                         if (EntityUtil.canHurtThisMob(entity1, this) && entity1.isAlive()) {
                             x = this.getX() - entity1.getX();
                             y = this.getY() - entity1.getY();
@@ -671,12 +686,12 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
             }
 
             int i;
-            if (this.attackType == this.POTIONS_ATTACK) {
-                if (this.attackTicks == 10) {
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_POTIONS.get(), 2.0F, 1.0F);
+            if (this.getAttackType() == this.POTIONS_ATTACK) {
+                if (this.getAttackTicks() == 10) {
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_POTIONS.get(), 2.0F, 1.0F, false);
                 }
 
-                if (this.attackTicks > 22) {
+                if (this.getAttackTicks() > 22) {
                     for (i = 0; i < 2; ++i) {
                         if (!this.level().isClientSide) {
                             ThrownPotion potionentity = new ThrownPotion(this.level(), this);
@@ -689,14 +704,14 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     }
                 }
 
-                if (this.attackTicks >= 10) {
+                if (this.getAttackTicks() >= 10) {
                     this.makePotionParticles();
                 }
             }
 
-            if (this.attackType == this.CROSSBOWSPIN_ATTACK) {
+            if (this.getAttackType() == this.CROSSBOWSPIN_ATTACK) {
                 MagiArrowEntity arrow;
-                if (this.attackTicks <= 12) {
+                if (this.getAttackTicks() <= 12) {
                     for (i = 0; i < 5; ++i) {
                         if (!this.level().isClientSide) {
                             arrow = new MagiArrowEntity(this.level(), this);
@@ -708,7 +723,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                             this.level().addFreshEntity(arrow);
                         }
                     }
-                } else if (this.attackTicks <= 41) {
+                } else if (this.getAttackTicks() <= 41) {
                     var2 = this.level().getEntitiesOfClass(MagiArrowEntity.class, this.getBoundingBox().inflate(50.0)).iterator();
 
                     while (var2.hasNext()) {
@@ -732,10 +747,11 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     }
                 }
 
-                if (this.attackTicks == 41) {
+                if (this.getAttackTicks() == 41) {
                     this.setAnimationState(0);
                     if (this.getTarget() != null) {
-                        this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_SPIN.get(), 1.0F, 1.0F);
+                        EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_SPIN.get(), 1.0F, 1.0F, false);
+
                         if (!this.level().isClientSide) {
                             this.setArrowState(1);
                         }
@@ -746,25 +762,25 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     }
                 }
 
-                if (this.attackTicks == 49) {
+                if (this.getAttackTicks() == 49) {
                     this.playSound(SoundEvents.CROSSBOW_QUICK_CHARGE_3, 1.0F, 1.0F);
                 }
 
-                if (this.attackTicks == 59 && this.getTarget() != null) {
+                if (this.getAttackTicks() == 59 && this.getTarget() != null) {
                     if (!this.level().isClientSide) {
                         this.setArrowState(2);
                     }
 
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_ARROWBARRAGE.get(), 2.0F, 1.0F);
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_ARROWBARRAGE.get(), 2.0F, 1.0F, false);
                 }
 
-                if (this.attackTicks >= 59 && this.getTarget() != null) {
+                if (this.getAttackTicks() >= 59 && this.getTarget() != null) {
                     this.fireArrow(this.getTarget(), 1.0F, 0.5F);
                 }
             }
 
-            if (this.attackType == this.CRASHAGER_ATTACK) {
-                if (this.attackTicks < 68) {
+            if (this.getAttackType() == this.CRASHAGER_ATTACK) {
+                if (this.getAttackTicks() < 68) {
                     this.setDeltaMovement(0.0, 0.06, 0.0);
                     this.makeCrashagerParticles1();
                     if (!this.level().isClientSide) {
@@ -772,7 +788,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                     }
                 }
 
-                if (this.attackTicks == 68) {
+                if (this.getAttackTicks() == 68) {
                     if (!this.level().isClientSide) {
                         this.setGlowState(0);
                         this.setShakeAmount(0);
@@ -800,19 +816,19 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 }
             }
 
-            if (this.attackType == this.DISPENSER_ATTACK) {
-                if (this.attackTicks == 4) {
+            if (this.getAttackType() == this.DISPENSER_ATTACK) {
+                if (this.getAttackTicks() == 4) {
                     this.makeDispenserParticles();
                     if (!this.level().isClientSide) {
                         this.setGlowState(5);
                     }
                 }
 
-                if (this.attackTicks == 20) {
+                if (this.getAttackTicks() == 20) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_LOAD.get(), 2.0F, 1.0F);
                 }
 
-                if (this.attackTicks == 30) {
+                if (this.getAttackTicks() == 30) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_SHOOT.get(), 2.0F, 1.0F);
                     if (!this.level().isClientSide) {
                         DispenserEntity dispenser = ModEntityTypes.Dispenser.get().create(this.level());
@@ -832,7 +848,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 }
             }
 
-            if (this.attackType == this.HEAL_ATTACK) {
+            if (this.getAttackType() == this.HEAL_ATTACK) {
                 if (this.damageTaken > 30.0F) {
                     this.gotHealed = false;
                 }
@@ -855,7 +871,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 }
             }
 
-            if (this.attackType == this.KNOCKBACK_ATTACK && this.attackTicks == 5) {
+            if (this.getAttackType() == this.KNOCKBACK_ATTACK && this.getAttackTicks() == 5) {
                 this.playSound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 2.0F, 1.0F);
                 var2 = this.level().getEntities(this, this.getBoundingBox().inflate(15.0)).iterator();
 
@@ -875,7 +891,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
                 }
             }
 
-            if (this.attackType == this.KABOOMER_ATTACK && this.attackTicks > 5 && !this.level().isClientSide) {
+            if (this.getAttackType() == this.KABOOMER_ATTACK && this.getAttackTicks() > 5 && !this.level().isClientSide) {
                 this.setGlowState(this.random.nextBoolean() ? 0 : 3);
                 this.setShakeAmount(this.getShakeAmount() + 1);
             }
@@ -888,7 +904,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
             this.setDeltaMovement(this.getDeltaMovement().subtract(-x / z * 0.06, 0.0, -y / z * 0.06));
         }
 
-        if (this.fallDistance > 5.0F && this.balloonCooldown < 1 && (this.attackType == 0 || this.attackType == this.HEAL_ATTACK) && this.isActive() && IllageAndSpillageConfig.magispeller_balloonAllowed.get() && this.isAlive()) {
+        if (this.fallDistance > 5.0F && this.balloonCooldown < 1 && (this.getAttackType() == 0 || this.getAttackType() == this.HEAL_ATTACK) && this.isActive() && IllageAndSpillageConfig.magispeller_balloonAllowed.get() && this.isAlive()) {
             this.playSound(SoundEvents.SNOWBALL_THROW, 3.0F, 0.5F);
             if (!this.level().isClientSide) {
                 this.setShowArms(true);
@@ -1869,7 +1885,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     }
 
     public boolean areIllagersNearby() {
-        return this.entityData.get(NEARBY_ILLAGERS);
+        return this.entityData.get(NEARBY_ILLAGERS) && !this.isActive();
     }
 
     public void setIllagersNearby(boolean illagersNearby) {
@@ -1893,7 +1909,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     }
 
     public boolean isPersistenceRequired() {
-        return true;
+        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     public boolean canBeAffected(MobEffectInstance p_70687_1_) {
@@ -1923,11 +1939,11 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     }
 
     public boolean doesAttackMeetNormalRequirements() {
-        return this.attackType == 0 && !this.areIllagersNearby() && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.isActive() && !this.isFaking() && !this.isRidingIllusion() && !this.isBalloon();
+        return this.getAttackType() == 0 && !this.areIllagersNearby() && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.isActive() && !this.isFaking() && !this.isRidingIllusion() && !this.isBalloon();
     }
 
     public boolean canAttackBackUp() {
-        return this.attackType == 0 || this.attackType == 1 || this.attackType == 2 && this.attackTicks < 31 || this.attackType == 4 || this.attackType == 7 || this.attackType == 9;
+        return this.getAttackType() == 0 || this.getAttackType() == 1 || this.getAttackType() == 2 && this.getAttackTicks() < 31 || this.getAttackType() == 4 || this.getAttackType() == 7 || this.getAttackType() == 9;
     }
 
     public boolean isBalloon() {
@@ -1946,10 +1962,6 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
     public boolean isTargetLowEnoughForGround() {
         return this.getTarget() != null && !(this.getTarget().getY() > this.getY() + 3.0);
-    }
-
-    public boolean isTargetCloseEnoughForRange() {
-        return this.getTarget() != null && this.distanceToSqr(this.getTarget()) < 26.0;
     }
 
     private boolean teleportTowards(Entity p_70816_1_) {
@@ -2160,6 +2172,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         BALLOON = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
         DEATH = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
         ANIMATION_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+        ATTACK_TYPE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+        ATTACK_TICKS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
     }
 
     class KaboomerGoal extends Goal {
@@ -2168,13 +2182,13 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.getTarget() != null && MagispellerEntity.this.attackType == 0 && !MagispellerEntity.this.isFaking() && !MagispellerEntity.this.areIllagersNearby() && MagispellerEntity.this.isActive() && !MagispellerEntity.this.isBalloon() && MagispellerEntity.this.getVehicle() == null && MagispellerEntity.this.random.nextInt(10) == 0 && MagispellerEntity.this.kaboomerCooldown < 1 && !MagispellerEntity.this.isRidingIllusion();
+            return MagispellerEntity.this.getTarget() != null && MagispellerEntity.this.getAttackType() == 0 && !MagispellerEntity.this.isFaking() && !MagispellerEntity.this.areIllagersNearby() && MagispellerEntity.this.isActive() && !MagispellerEntity.this.isBalloon() && MagispellerEntity.this.getVehicle() == null && MagispellerEntity.this.random.nextInt(10) == 0 && MagispellerEntity.this.kaboomerCooldown < 1 && !MagispellerEntity.this.isRidingIllusion();
         }
 
         public void start() {
             MagispellerEntity.this.setAnimationState(11);
-            MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_KABOOMER.get(), 3.0F, 1.0F);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.KABOOMER_ATTACK;
+            EntityUtil.mobFollowingSound(level(), MagispellerEntity.this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_KABOOMER.get(), 3.0F, 1.0F, false);
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.KABOOMER_ATTACK);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2182,7 +2196,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 43;
+            return MagispellerEntity.this.getAttackTicks() <= 43;
         }
 
         public void tick() {
@@ -2195,8 +2209,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2237,12 +2251,12 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.attackType == 0 && !MagispellerEntity.this.isFaking() && !MagispellerEntity.this.areIllagersNearby() && MagispellerEntity.this.healCooldown < 1 && MagispellerEntity.this.isActive() && MagispellerEntity.this.random.nextInt(14) == 0 && MagispellerEntity.this.getHealth() < MagispellerEntity.this.getMaxHealth() && !MagispellerEntity.this.hasEffect(MobEffects.REGENERATION) && !MagispellerEntity.this.isBalloon() && !MagispellerEntity.this.isRidingIllusion();
+            return MagispellerEntity.this.getAttackType() == 0 && !MagispellerEntity.this.isFaking() && !MagispellerEntity.this.areIllagersNearby() && MagispellerEntity.this.healCooldown < 1 && MagispellerEntity.this.isActive() && MagispellerEntity.this.random.nextInt(14) == 0 && MagispellerEntity.this.getHealth() < MagispellerEntity.this.getMaxHealth() && !MagispellerEntity.this.hasEffect(MobEffects.REGENERATION) && !MagispellerEntity.this.isBalloon() && !MagispellerEntity.this.isRidingIllusion();
         }
 
         public void start() {
             MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_HEAL.get(), 2.0F, 1.0F);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.HEAL_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.HEAL_ATTACK);
             MagispellerEntity.this.gotHealed = true;
             MagispellerEntity.this.damageTaken = 0.0F;
             if (!MagispellerEntity.this.level().isClientSide) {
@@ -2261,7 +2275,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 140 && MagispellerEntity.this.gotHealed;
+            return MagispellerEntity.this.getAttackTicks() <= 140 && MagispellerEntity.this.gotHealed;
         }
 
         public void tick() {
@@ -2274,8 +2288,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
                 MagispellerEntity.this.setWavingArms(false);
@@ -2301,13 +2315,13 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(8) == 0 && MagispellerEntity.this.dispenserCooldown < 1 && MagispellerEntity.this.isTargetCloseEnoughForRange() && MagispellerEntity.this.isTargetLowEnoughForGround();
+            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(8) == 0 && MagispellerEntity.this.dispenserCooldown < 1;
         }
 
         public void start() {
             MagispellerEntity.this.setAnimationState(9);
             MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_DISPENSER.get(), 2.0F, 1.0F);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.DISPENSER_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.DISPENSER_ATTACK);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2315,7 +2329,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 40;
+            return MagispellerEntity.this.getAttackTicks() <= 40;
         }
 
         public void tick() {
@@ -2328,8 +2342,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2347,13 +2361,13 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.getVehicle() == null && MagispellerEntity.this.random.nextInt(12) == 0 && MagispellerEntity.this.crashagerCooldown < 1 && MagispellerEntity.this.isTargetCloseEnoughForRange() && MagispellerEntity.this.isTargetLowEnoughForGround();
+            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.getVehicle() == null && MagispellerEntity.this.random.nextInt(12) == 0 && MagispellerEntity.this.crashagerCooldown < 1 && MagispellerEntity.this.isTargetLowEnoughForGround();
         }
 
         public void start() {
             MagispellerEntity.this.setAnimationState(8);
-            MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_RAVAGER.get(), 2.0F, 1.0F);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.CRASHAGER_ATTACK;
+            EntityUtil.mobFollowingSound(level(), MagispellerEntity.this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_RAVAGER.get(), 2.0F, 1.0F, false);
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.CRASHAGER_ATTACK);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
                 MagispellerEntity.this.setShakeAmount(30);
@@ -2362,7 +2376,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 71 || MagispellerEntity.this.isRidingIllusion();
+            return MagispellerEntity.this.getAttackTicks() <= 71 || MagispellerEntity.this.isRidingIllusion();
         }
 
         public void tick() {
@@ -2375,8 +2389,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2397,7 +2411,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
         public void start() {
             MagispellerEntity.this.setAnimationState(7);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.CROSSBOWSPIN_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.CROSSBOWSPIN_ATTACK);
             MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_CROSSBOWSPIN.get(), 2.0F, 1.0F);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
@@ -2406,7 +2420,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 133;
+            return MagispellerEntity.this.getAttackTicks() <= 133;
         }
 
         public void tick() {
@@ -2419,8 +2433,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2437,12 +2451,12 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(12) == 0 && MagispellerEntity.this.throwPotionsCooldown < 1 && MagispellerEntity.this.isTargetCloseEnoughForRange() && MagispellerEntity.this.isTargetLowEnoughForGround() && !(Objects.requireNonNull(MagispellerEntity.this.getTarget())).hasEffect(MobEffects.MOVEMENT_SLOWDOWN);
+            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(12) == 0 && MagispellerEntity.this.throwPotionsCooldown < 1 && distanceToSqr(getTarget()) < 36 && MagispellerEntity.this.isTargetLowEnoughForGround() && !(Objects.requireNonNull(MagispellerEntity.this.getTarget())).hasEffect(MobEffects.MOVEMENT_SLOWDOWN);
         }
 
         public void start() {
             MagispellerEntity.this.setAnimationState(6);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.POTIONS_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.POTIONS_ATTACK);
             MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_POTIONS_START.get(), 2.0F, 1.0F);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
@@ -2451,7 +2465,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 68;
+            return MagispellerEntity.this.getAttackTicks() <= 68;
         }
 
         public void tick() {
@@ -2464,8 +2478,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2481,12 +2495,12 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(10) == 0 && MagispellerEntity.this.fangrunCooldown < 1 && MagispellerEntity.this.isTargetCloseEnoughForRange() && MagispellerEntity.this.isTargetLowEnoughForGround();
+            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(10) == 0 && MagispellerEntity.this.fangrunCooldown < 1 && distanceToSqr(getTarget()) < 256.0 && MagispellerEntity.this.isTargetLowEnoughForGround();
         }
 
         public void start() {
             MagispellerEntity.this.setAnimationState(5);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.FANGRUN_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.FANGRUN_ATTACK);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2494,7 +2508,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 109;
+            return MagispellerEntity.this.getAttackTicks() <= 109;
         }
 
         public void tick() {
@@ -2507,8 +2521,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2531,7 +2545,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
         public void start() {
             MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_SUMMON.get(), 1.0F, 1.0F);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.VEXES_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.VEXES_ATTACK);
             MagispellerEntity.this.setAnimationState(4);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
@@ -2540,7 +2554,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 40;
+            return MagispellerEntity.this.getAttackTicks() <= 40;
         }
 
         public void tick() {
@@ -2553,8 +2567,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2575,8 +2589,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
         public void start() {
             MagispellerEntity.this.setAnimationState(3);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.FAKERS_ATTACK;
-            MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_PREPARE_FAKERS.get(), 2.0F, 1.0F);
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.FAKERS_ATTACK);
+            EntityUtil.mobFollowingSound(level(), MagispellerEntity.this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_PREPARE_FAKERS.get(), 2.0F, 1.0F, false);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2584,7 +2598,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 51;
+            return MagispellerEntity.this.getAttackTicks() <= 51;
         }
 
         public void tick() {
@@ -2597,8 +2611,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2666,13 +2680,13 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canUse() {
-            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(10) == 0 && MagispellerEntity.this.lifestealCooldown < 1 && MagispellerEntity.this.isTargetCloseEnoughForRange();
+            return MagispellerEntity.this.doesAttackMeetNormalRequirements() && MagispellerEntity.this.random.nextInt(10) == 0 && MagispellerEntity.this.lifestealCooldown < 1 && distanceToSqr(getTarget()) < 144.0;
         }
 
         public void start() {
             MagispellerEntity.this.setAnimationState(2);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.LIFESTEAL_ATTACK;
-            MagispellerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_LIFESTEAL_START.get(), 2.0F, 1.0F);
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.LIFESTEAL_ATTACK);
+            EntityUtil.mobFollowingSound(level(), MagispellerEntity.this, IllageAndSpillageSoundEvents.ENTITY_MAGISPELLER_LIFESTEAL_START.get(), 2.0F, 1.0F, false);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2680,7 +2694,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 139;
+            return MagispellerEntity.this.getAttackTicks() <= 139;
         }
 
         public void tick() {
@@ -2693,8 +2707,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2717,7 +2731,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
         public void start() {
             MagispellerEntity.this.setAnimationState(1);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.FIREBALL_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.FIREBALL_ATTACK);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2725,7 +2739,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 70;
+            return MagispellerEntity.this.getAttackTicks() <= 70;
         }
 
         public void tick() {
@@ -2738,8 +2752,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);
@@ -2761,7 +2775,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
         public void start() {
             MagispellerEntity.this.setAnimationState(10);
-            MagispellerEntity.this.attackType = MagispellerEntity.this.KNOCKBACK_ATTACK;
+            MagispellerEntity.this.setAttackType(MagispellerEntity.this.KNOCKBACK_ATTACK);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(true);
             }
@@ -2769,7 +2783,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public boolean canContinueToUse() {
-            return MagispellerEntity.this.attackTicks <= 14;
+            return MagispellerEntity.this.getAttackTicks() <= 14;
         }
 
         public void tick() {
@@ -2782,8 +2796,8 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
         }
 
         public void stop() {
-            MagispellerEntity.this.attackTicks = 0;
-            MagispellerEntity.this.attackType = 0;
+            MagispellerEntity.this.setAttackTicks(0);
+            MagispellerEntity.this.setAttackType(0);
             MagispellerEntity.this.setAnimationState(0);
             if (!MagispellerEntity.this.level().isClientSide) {
                 MagispellerEntity.this.setShowArms(false);

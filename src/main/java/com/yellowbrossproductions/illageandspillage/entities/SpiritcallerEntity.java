@@ -8,6 +8,7 @@ import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
+import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import com.yellowbrossproductions.illageandspillage.util.ItemRegisterer;
 import net.minecraft.core.BlockPos;
@@ -115,9 +116,6 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
     double laserY;
     double laserZ;
     int stuckTime;
-    int lastX;
-    int lastY;
-    int lastZ;
     private DamageSource lastDamageSource;
 
     public SpiritcallerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
@@ -163,13 +161,13 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 15.0F, 1.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 15.0F));
         this.targetSelector.addGoal(1, (new HurtByTargetGoal(this, Raider.class)).setAlertOthers());
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true).setUnseenMemoryTicks(300));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 160.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.spiritcaller_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
     }
 
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
@@ -380,7 +378,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
                 this.setIllagersNearby(!list.isEmpty());
             }
 
-            if (!list.isEmpty()) {
+            if (this.areIllagersNearby()) {
                 this.setTarget(null);
             }
         }
@@ -416,7 +414,8 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
                     }
                 }
 
-                this.playSound(IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_INTRO.get(), 2.0F, 1.0F);
+                EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_INTRO.get(), 2.0F, 1.0F, false);
+
                 if (!this.level().isClientSide) {
                     this.setRitual(true);
                 }
@@ -473,10 +472,6 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
             } else if (this.stuckTime > 0) {
                 --this.stuckTime;
             }
-
-            this.lastX = this.blockPosition().getX();
-            this.lastY = this.blockPosition().getY();
-            this.lastZ = this.blockPosition().getZ();
         }
 
         if (this.spiritSwarmCooldown > 0) {
@@ -1162,7 +1157,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
     }
 
     public boolean areIllagersNearby() {
-        return this.entityData.get(NEARBY_ILLAGERS);
+        return this.entityData.get(NEARBY_ILLAGERS) && this.ritualTicks < 1 && !this.isActive();
     }
 
     public void setIllagersNearby(boolean illagersNearby) {
@@ -1361,7 +1356,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
     }
 
     public boolean isPersistenceRequired() {
-        return true;
+        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     public void stopAttackersFromAttacking() {
@@ -1464,9 +1459,6 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
     }
 
     class AntiCheeseGoal extends Goal {
-        AntiCheeseGoal() {
-        }
-
         public boolean canUse() {
             return SpiritcallerEntity.this.stuckTime > 5 && SpiritcallerEntity.this.attackType == 0 && !SpiritcallerEntity.this.areIllagersNearby() && SpiritcallerEntity.this.getTarget() != null && SpiritcallerEntity.this.isActive() && !SpiritcallerEntity.this.isFaking() && SpiritcallerEntity.this.antiCheeseCooldown < 1 && SpiritcallerEntity.this.attackCooldown < 1;
         }
@@ -1508,7 +1500,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
         }
 
         public void start() {
-            SpiritcallerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_STEALSPIRITS.get(), 2.0F, 1.0F);
+            EntityUtil.mobFollowingSound(level(), SpiritcallerEntity.this, IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_STEALSPIRITS.get(), 2.0F, 1.0F, false);
             SpiritcallerEntity.this.setArmsUpward(true);
             SpiritcallerEntity.this.attackType = SpiritcallerEntity.this.SPIRIT_STEAL;
             List<Mob> stealingMobs = SpiritcallerEntity.this.level().getEntitiesOfClass(Mob.class, SpiritcallerEntity.this.getBoundingBox().inflate(15.0), (predicate) -> IllageAndSpillageConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate != SpiritcallerEntity.this);
@@ -1582,7 +1574,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
         }
 
         public void start() {
-            SpiritcallerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_SPIRITSWARM.get(), 2.0F, 1.0F);
+            EntityUtil.mobFollowingSound(level(), SpiritcallerEntity.this, IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_SPIRITSWARM.get(), 2.0F, 1.0F, false);
             SpiritcallerEntity.this.setArmsUpward(true);
             SpiritcallerEntity.this.attackType = SpiritcallerEntity.this.SOUL_SWARM;
         }
@@ -1605,7 +1597,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
                 double motionZ = SpiritcallerEntity.this.getDeltaMovement().z - z / d * (double) power * 0.2;
                 SpiritcallerEntity.this.setTargetPosition(entity.getX(), entity.getY(), entity.getZ());
                 SpiritcallerEntity.this.setCharge(motionX, motionY, motionZ);
-            } else {
+            } else if (!level().isClientSide) {
                 SpiritcallerEntity.this.setFaking(false);
             }
 
@@ -1660,7 +1652,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
         }
 
         public void start() {
-            SpiritcallerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_SPIRITHANDS.get(), 2.0F, 1.0F);
+            EntityUtil.mobFollowingSound(level(), SpiritcallerEntity.this, IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_SPIRITHANDS.get(), 2.0F, 1.0F, false);
             SpiritcallerEntity.this.setSpinning(true);
             SpiritcallerEntity.this.attackType = SpiritcallerEntity.this.SPIRIT_HANDS;
         }
@@ -1691,7 +1683,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
         }
 
         public void start() {
-            SpiritcallerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_CHARGELASER.get(), 2.0F, 1.0F);
+            EntityUtil.mobFollowingSound(level(), SpiritcallerEntity.this, IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_CHARGELASER.get(), 2.0F, 1.0F, false);
             SpiritcallerEntity.this.setChargingLaser(true);
             SpiritcallerEntity.this.attackType = SpiritcallerEntity.this.SOUL_LASER;
         }

@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -36,7 +37,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Ravager;
@@ -48,7 +48,7 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
@@ -68,6 +68,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     private static final EntityDataAccessor<Integer> VILLAGER_FACE;
     private static final EntityDataAccessor<Integer> FREAKAGER_FACE = SynchedEntityData.defineId(FreakagerEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> VILLAGER_SHAKE_MULTIPLIER = SynchedEntityData.defineId(FreakagerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> PHASED_OUT = SynchedEntityData.defineId(FreakagerEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SCYTHE;
     private int introTicks;
     public AnimationState laughAnimationState = new AnimationState();
@@ -83,8 +84,9 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     public AnimationState scytheAnimationState = new AnimationState();
     public AnimationState catchAnimationState = new AnimationState();
     public AnimationState trickortreatAnimationState = new AnimationState();
+    public AnimationState anticheeseAnimationState = new AnimationState();
     public AnimationState phaseAnimationState = new AnimationState();
-    private int attackType;
+    public int attackType;
     private int attackTicks;
     private int attackCooldown;
     private static final int BOMBS_ATTACK = 1;
@@ -94,6 +96,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     private static final int SCYTHE_ATTACK = 5;
     private static final int TRICKORTREAT_ATTACK = 6;
     private static final int MINIONS_ATTACK = 7;
+    public static final int ANTICHEESE_ATTACK = 8;
     private int bombsCooldown;
     private int minionsCooldown;
     private int axesCooldown;
@@ -105,7 +108,8 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     public int catchTicks;
     private final List<TrickOrTreatEntity> treats = new ArrayList<>();
     private LivingEntity entityToStareAt;
-    private int customDeathTime;
+    public int customDeathTime;
+    private int stuckTime;
 
     public FreakagerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
@@ -149,6 +153,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         this.goalSelector.addGoal(0, new AxesGoal());
         this.goalSelector.addGoal(0, new ThrowBombsGoal());
         this.goalSelector.addGoal(0, new ThrowMinionsGoal());
+        this.goalSelector.addGoal(0, new AnticheeseGoal());
         this.goalSelector.addGoal(0, new IntroGoal());
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new AlwaysWatchTargetGoal());
@@ -158,13 +163,13 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 15.0F, 1.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 15.0F));
         this.targetSelector.addGoal(1, (new HurtByTargetGoal(this, Raider.class)).setAlertOthers());
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false).setUnseenMemoryTicks(300));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true).setUnseenMemoryTicks(300));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 160.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.freakager_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
     }
 
     protected void defineSynchedData() {
@@ -178,6 +183,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         this.entityData.define(VILLAGER_FACE, 0);
         this.entityData.define(FREAKAGER_FACE, 0);
         this.entityData.define(VILLAGER_SHAKE_MULTIPLIER, 0);
+        this.entityData.define(PHASED_OUT, false);
         this.entityData.define(SCYTHE, false);
     }
 
@@ -186,7 +192,6 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         if (this.isActive()) {
             p_37870_.putBoolean("active", true);
         }
-
     }
 
     public void readAdditionalSaveData(CompoundTag tag) {
@@ -200,12 +205,16 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
 
     public void setHealth(float p_21154_) {
         float healthValue = p_21154_ - this.getHealth();
-        if (healthValue > 0 || (!this.areIllagersNearby() && this.isActive()) || healthValue <= -1000000000000.0F) {
+        if (healthValue > 0 || (!this.areIllagersNearby() && this.isActive() && !this.isPhasedOut() && (this.ridingRideableMob() || this.level().getEntitiesOfClass(RagnoEntity.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.getOwner() == this && predicate.isAlive()).isEmpty())) || healthValue <= -1000000000000.0F) {
             super.setHealth(p_21154_);
         }
     }
 
     public void applyRaidBuffs(int p_213660_1_, boolean p_213660_2_) {
+    }
+
+    public boolean canAttack(LivingEntity p_186270_) {
+        return (!(p_186270_ instanceof Player) || this.level().getDifficulty() != Difficulty.PEACEFUL) && p_186270_.canBeSeenAsEnemy() && p_186270_ != this.getVehicle();
     }
 
     public SoundEvent getBossMusic() {
@@ -235,7 +244,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     public boolean hasFewEnoughMinions() {
-        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.isAlive() && (predicate instanceof EyesoreEntity || predicate instanceof FunnyboneEntity) && ((IllagerAttack) predicate).getOwner() == this);
+        List<Monster> list = this.level().getEntitiesOfClass(Monster.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.isAlive() && (predicate instanceof EyesoreEntity || predicate instanceof FunnyboneEntity) && ((IllagerAttack) predicate).getOwner() == this);
         return list.size() < 3;
     }
 
@@ -250,7 +259,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                 this.setIllagersNearby(!list.isEmpty());
             }
 
-            if (!list.isEmpty()) {
+            if (this.areIllagersNearby()) {
                 this.setTarget(null);
             }
         }
@@ -462,6 +471,16 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
             }
         }
 
+        if (this.isActive() && this.getTarget() != null && this.tickCount % 20 == 10) {
+            if (!this.hasLineOfSight(this.getTarget()) || (this.getVehicle() != null && (this.getVehicle().isInWater() || this.getVehicle().isInLava() || this.getVehicle().isInPowderSnow))) {
+                ++this.stuckTime;
+            } else if (this.stuckTime > 0) {
+                --this.stuckTime;
+            }
+        } else if (this.isActive() && !this.ridingRideableMob()) {
+            this.stuckTime = 1000;
+        }
+
         if (this.attackType > 0) {
             ++this.attackTicks;
         }
@@ -501,12 +520,17 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
             this.yBodyRot = this.getYRot();
         }
 
-        if (!this.isPassenger()) {
+        if (this.isActive() && !this.ridingRideableMob()) {
             List<RagnoEntity> ragnolist = this.level().getEntitiesOfClass(RagnoEntity.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.getOwner() == this && predicate.isAlive());
-            if (!ragnolist.isEmpty()) {
+            if (!ragnolist.isEmpty() && this.attackType == ANTICHEESE_ATTACK) {
                 ragno = ragnolist.get(0);
-                this.getNavigation().moveTo(ragno, 2.0);
-                if (this.distanceToSqr(ragno) < 9.0 && !this.level().isClientSide) {
+                if (!ragno.isAnticheese()) {
+                    ragno.setStunned(false);
+                    ragno.stopAttacking();
+                    ragno.setAnticheese(true);
+                }
+                if (this.isPhasedOut() && !this.level().isClientSide) {
+                    if (this.isPassenger() && this.getVehicle() != ragno) this.stopRiding();
                     this.startRiding(ragno);
                 }
             }
@@ -671,6 +695,8 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                             projectile.moveTo(this.getX(), this.getY() + 1, this.getZ());
                             CompoundTag tag = this.getPersistentData().getCompound("Rotation");
                             projectile.readAdditionalSaveData(tag);
+                            projectile.setYHeadRot(this.getYHeadRot());
+                            projectile.setYRot(this.getYHeadRot());
 
                             projectile.setShooter(this);
                             this.level().addFreshEntity(projectile);
@@ -692,7 +718,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                     this.setItemSlot(EquipmentSlot.MAINHAND, Items.IRON_AXE.getDefaultInstance());
                     this.setItemSlot(EquipmentSlot.OFFHAND, Items.IRON_AXE.getDefaultInstance());
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_AXE_DRAW.get(), 2.0F, this.getVoicePitch());
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_ANGRYAXES.get(), 4.0F, 1.0F);
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_ANGRYAXES.get(), 3.0F, 1.0F, false);
                     this.setFreakagerFace(3);
                 }
 
@@ -749,7 +775,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                 }
 
                 if (this.attackTicks == 20) {
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_SPIN.get(), 2.0F, 1.0F);
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_SPIN.get(), 2.0F, 1.0F, false);
                     this.setFreakagerFace(0);
                     this.potionThrowDistance = 0.0;
                 }
@@ -871,6 +897,48 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                     this.setFreakagerFace(0);
                 }
             }
+
+            if (this.attackType == ANTICHEESE_ATTACK) {
+                if (this.attackTicks == 5) {
+                    this.playSound(SoundEvents.BOTTLE_FILL, 1.0F, 1.0F);
+                }
+
+                if (this.attackTicks == 15) {
+                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_REVEAL.get(), 1.0F, 1.0F);
+                    this.playSound(SoundEvents.WITCH_THROW, 1.0F, this.getVoicePitch());
+                    this.setFreakagerFace(1);
+                    this.setItemSlot(EquipmentSlot.OFFHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY));
+                }
+
+                if (this.attackTicks == 25) {
+                    this.playSound(SoundEvents.WITCH_DRINK, 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+                    this.setFreakagerFace(2);
+                }
+
+                if (this.attackTicks == 30) {
+                    this.playSound(SoundEvents.ILLUSIONER_MIRROR_MOVE, 1.0F, 1.0F);
+                    this.level().broadcastEntityEvent(this, (byte) 60);
+                    this.setPhasedOut(true);
+                    this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+                    this.setAnimationState(0);
+                }
+
+                if (this.attackTicks == 63) {
+                    this.setAnimationState(1);
+                }
+
+                if (this.attackTicks == 98) {
+                    this.playSound(SoundEvents.ILLUSIONER_MIRROR_MOVE, 1.0F, 1.0F);
+                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_REVEAL.get(), 1.0F, 1.0F);
+                    this.level().broadcastEntityEvent(this, (byte) 60);
+                    this.setFreakagerFace(1);
+                    this.setPhasedOut(false);
+                }
+
+                if (this.attackTicks == 108) {
+                    this.setFreakagerFace(0);
+                }
+            }
         }
 
     }
@@ -894,7 +962,13 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         return (p_20330_ instanceof RagnoEntity || p_20330_ instanceof CrocofangEntity || p_20330_ instanceof Ravager) && super.startRiding(p_20330_);
     }
 
+    public boolean ridingRideableMob() {
+        return this.getVehicle() instanceof RagnoEntity || this.getVehicle() instanceof CrocofangEntity || this.getVehicle() instanceof Ravager;
+    }
+
     public void die(DamageSource p_37847_) {
+        this.setPhasedOut(false);
+
         if (!this.treats.isEmpty()) {
 
             for (TrickOrTreatEntity treat : this.treats) {
@@ -902,9 +976,9 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
             }
         }
 
-        List<Raider> minions = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(40.0));
+        List<Monster> minions = this.level().getEntitiesOfClass(Monster.class, this.getBoundingBox().inflate(40.0));
         if (!minions.isEmpty()) {
-            for (Raider raider : minions) {
+            for (Monster raider : minions) {
                 if (raider instanceof EyesoreEntity && ((EyesoreEntity) raider).getOwner() == this) {
                     raider.setLastHurtByMob(null);
                     raider.setTarget(null);
@@ -938,6 +1012,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
             ++this.customDeathTime;
 
             this.clearFire();
+            this.switchAttackersToRagno();
 
             if (this.customDeathTime == 15) {
                 this.setFreakagerFace(0);
@@ -1012,6 +1087,39 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     public void distractAttackers() {
+        if (!this.treats.isEmpty()) {
+            List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
+
+            for (Mob attacker : list) {
+                TrickOrTreatEntity treat = this.treats.get(this.random.nextInt(this.treats.size()));
+                if (attacker.getLastHurtByMob() == this) {
+                    attacker.setLastHurtByMob(treat);
+                }
+
+                if (attacker.getTarget() == this) {
+                    attacker.setTarget(treat);
+                }
+
+                if (attacker instanceof Warden warden) {
+                    if (warden.getTarget() == this) {
+                        warden.increaseAngerAt(treat, AngerLevel.ANGRY.getMinimumAnger() + 100, false);
+                        warden.setAttackTarget(treat);
+                    }
+                } else {
+                    try {
+                        if (attacker.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET) && attacker.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent() && attacker.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get() == this) {
+                            attacker.getBrain().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, treat.getUUID(), 600L);
+                            attacker.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, treat, 600L);
+                        }
+                    } catch (NullPointerException ignored) {
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void switchAttackersToRagno() {
         if (!this.treats.isEmpty()) {
             List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
 
@@ -1182,9 +1290,18 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     public boolean hurt(DamageSource source, float amount) {
+        if (this.isActive() && !this.ridingRideableMob() && !source.is(DamageTypes.FELL_OUT_OF_WORLD) && !source.is(DamageTypes.GENERIC_KILL)) {
+            List<RagnoEntity> ragnolist = this.level().getEntitiesOfClass(RagnoEntity.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.getOwner() == this && predicate.isAlive());
+            if (!ragnolist.isEmpty()) return false;
+        }
+
+        if (this.isPhasedOut() && !source.is(DamageTypes.FELL_OUT_OF_WORLD) && !source.is(DamageTypes.GENERIC_KILL)) {
+            return false;
+        }
+
         if (!this.isActive() && !source.is(DamageTypes.FELL_OUT_OF_WORLD) && !source.is(DamageTypes.GENERIC_KILL)) {
             amount = 0.0F;
-            if (source.getEntity() != null && this.introTicks == 0 && !this.areIllagersNearby()) {
+            if (!this.level().isClientSide && source.getEntity() != null && this.introTicks == 0 && !this.areIllagersNearby()) {
                 this.introTicks = 1;
                 if (this.hasActiveRaid() && this.getCurrentRaid() != null) {
                     this.getCurrentRaid().ticksActive = 0L;
@@ -1196,7 +1313,9 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
             this.entityToStareAt = (LivingEntity) source.getEntity();
         }
 
-        if (source.isIndirect()) amount /= 2;
+        if (this.getVehicle() instanceof RagnoEntity && !((RagnoEntity) this.getVehicle()).isStunned() && (!(source.getEntity() instanceof Player) || !((Player) source.getEntity()).getAbilities().instabuild)) {
+            amount /= 3.5;
+        }
 
         if (this.areIllagersNearby() && !source.is(DamageTypes.FELL_OUT_OF_WORLD) && !source.is(DamageTypes.GENERIC_KILL)) {
             return false;
@@ -1210,7 +1329,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     protected SoundEvent getAmbientSound() {
-        return this.introTicks > 1 ? null : IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_AMBIENT.get();
+        return this.introTicks > 1 || this.isPhasedOut() ? null : IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_AMBIENT.get();
     }
 
     protected SoundEvent getHurtSound(DamageSource p_184601_1_) {
@@ -1273,14 +1392,14 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         if (Objects.equals(input, "trickortreat")) {
             return this.trickortreatAnimationState;
         }
+        if (Objects.equals(input, "anticheese")) {
+            return this.anticheeseAnimationState;
+        }
         return Objects.equals(input, "phase") ? this.phaseAnimationState : new AnimationState();
     }
 
     protected void dropAllDeathLoot(DamageSource source) {
-        if (this.getVehicle() == null) {
-            if (this.shouldDropLoot() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && source.getDirectEntity() instanceof ScytheEntity) {
-                this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), new ItemStack(ItemRegisterer.FREAKAGER_DISC.get())));
-            }
+        if (!this.ridingRideableMob()) {
             super.dropAllDeathLoot(source);
         }
     }
@@ -1345,6 +1464,10 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                     this.stopAllAnimationStates();
                     this.phaseAnimationState.start(this.tickCount);
                 }
+                case 15 -> {
+                    this.stopAllAnimationStates();
+                    this.anticheeseAnimationState.start(this.tickCount);
+                }
             }
         }
 
@@ -1365,6 +1488,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         this.scytheAnimationState.stop();
         this.catchAnimationState.stop();
         this.trickortreatAnimationState.stop();
+        this.anticheeseAnimationState.stop();
         this.phaseAnimationState.stop();
     }
 
@@ -1394,7 +1518,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     public boolean areIllagersNearby() {
-        return this.entityData.get(NEARBY_ILLAGERS);
+        return this.entityData.get(NEARBY_ILLAGERS) && this.introTicks < 1 && !this.isActive();
     }
 
     public void setIllagersNearby(boolean illagersNearby) {
@@ -1425,6 +1549,14 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         this.entityData.set(SHOW_VILLAGER, showVillager);
     }
 
+    public boolean isPhasedOut() {
+        return this.entityData.get(PHASED_OUT);
+    }
+
+    public void setPhasedOut(boolean phasedOut) {
+        this.entityData.set(PHASED_OUT, phasedOut);
+    }
+
     public boolean shouldShowScythe() {
         return this.entityData.get(SCYTHE);
     }
@@ -1434,7 +1566,27 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     public boolean isPersistenceRequired() {
-        return true;
+        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
+    }
+
+    public boolean isPickable() {
+        return !this.isPhasedOut() && super.isPickable();
+    }
+
+    public boolean isAttackable() {
+        return !this.isPhasedOut() && super.isAttackable();
+    }
+
+    public boolean attackable() {
+        return !this.isPhasedOut() && super.attackable();
+    }
+
+    public void push(Entity p_21294_) {
+        if (!isPhasedOut()) super.push(p_21294_);
+    }
+
+    protected void pushEntities() {
+        if (!isPhasedOut()) super.pushEntities();
     }
 
     public boolean doesAttackMeetNormalRequirements() {
@@ -1778,6 +1930,62 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
         }
     }
 
+    class AnticheeseGoal extends Goal {
+        public AnticheeseGoal() {
+            this.setFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
+        }
+
+        public boolean canUse() {
+            if (attackType == 0 && getTarget() != null && stuckTime > 5 && !ridingRideableMob()) {
+                List<RagnoEntity> ragnolist = level().getEntitiesOfClass(RagnoEntity.class, getBoundingBox().inflate(100.0), (predicate) -> predicate.getOwner() == FreakagerEntity.this && predicate.isAlive());
+                return !ragnolist.isEmpty();
+            } else if (attackType == 0 && getTarget() != null && stuckTime > 5 && getVehicle() instanceof RagnoEntity ragno) {
+                return !ragno.isStunned() && ragno.getAttackType() == 0;
+            }
+
+            return false;
+        }
+
+        public void start() {
+            if (getVehicle() instanceof RagnoEntity ragno && !ragno.level().isClientSide) {
+                ragno.setAnticheese(true);
+            }
+            FreakagerEntity.this.setAnimationState(15);
+            FreakagerEntity.this.setFreakagerFace(2);
+            FreakagerEntity.this.attackType = ANTICHEESE_ATTACK;
+            if (!FreakagerEntity.this.level().isClientSide) {
+                FreakagerEntity.this.setShowArms(true);
+            }
+
+        }
+
+        public boolean canContinueToUse() {
+            return FreakagerEntity.this.attackTicks <= 110;
+        }
+
+        public void tick() {
+            FreakagerEntity.this.getNavigation().stop();
+            if (FreakagerEntity.this.getTarget() != null) {
+                FreakagerEntity.this.getLookControl().setLookAt(FreakagerEntity.this.getTarget(), 100.0F, 100.0F);
+            }
+
+            FreakagerEntity.this.navigation.stop();
+        }
+
+        public void stop() {
+            FreakagerEntity.this.attackTicks = 0;
+            FreakagerEntity.this.attackType = 0;
+            FreakagerEntity.this.setAnimationState(0);
+            if (!FreakagerEntity.this.level().isClientSide) {
+                FreakagerEntity.this.setShowArms(false);
+            }
+
+            FreakagerEntity.this.minionsCooldown = 400;
+            FreakagerEntity.this.attackCooldown = 10;
+            FreakagerEntity.this.stuckTime = 0;
+        }
+    }
+
     class IntroGoal extends Goal {
 
         public IntroGoal() {
@@ -1791,7 +1999,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
 
         @Override
         public void start() {
-            playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_REVEAL.get(), 1.0F, 1.0F);
+            FreakagerEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_REVEAL.get(), 1.0F, 1.0F);
         }
 
         @Override

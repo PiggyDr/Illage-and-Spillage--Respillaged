@@ -1,6 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.events;
 
 import com.yellowbrossproductions.illageandspillage.IllageAndSpillage;
+import com.yellowbrossproductions.illageandspillage.capability.PreservedProvider;
 import com.yellowbrossproductions.illageandspillage.capability.WebbedProvider;
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.*;
@@ -266,9 +267,20 @@ public class ForgeEventBusSubscriber {
     }
 
     @SubscribeEvent
-    public static void attachWebbedCapability(AttachCapabilitiesEvent<Entity> event) {
+    public static void preservedEffects(LivingEvent.LivingTickEvent event) {
+        LivingEntity mob = event.getEntity();
+        if (mob.hasEffect(EffectRegisterer.PRESERVED.get())) {
+            if (!mob.level().isClientSide && !EntityUtil.isPreserved(mob)) EntityUtil.setPreserved(mob, true);
+        } else if (!mob.level().isClientSide && EntityUtil.isPreserved(mob)) {
+            EntityUtil.setPreserved(mob, false);
+        }
+    }
+
+    @SubscribeEvent
+    public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof LivingEntity) {
             event.addCapability(new ResourceLocation("illageandspillage", "webbed"), new WebbedProvider());
+            event.addCapability(new ResourceLocation("illageandspillage", "preserved"), new PreservedProvider());
         }
     }
 }

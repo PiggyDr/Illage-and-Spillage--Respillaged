@@ -8,9 +8,6 @@ import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -31,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ScytheEntity extends PathfinderMob implements IllagerAttack {
-    private static final EntityDataAccessor<Boolean> OLD = SynchedEntityData.defineId(ScytheEntity.class, EntityDataSerializers.BOOLEAN);
     public double accelerationX;
     public double accelerationY;
     public double accelerationZ;
@@ -48,17 +44,8 @@ public class ScytheEntity extends PathfinderMob implements IllagerAttack {
         return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.0).add(Attributes.MAX_HEALTH, 2.0).add(Attributes.ATTACK_DAMAGE, 0.0).add(Attributes.FOLLOW_RANGE, 32.0);
     }
 
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(OLD, false);
-    }
-
-    public boolean isOld() {
-        return this.entityData.get(OLD);
-    }
-
-    public void setOld(boolean old) {
-        this.entityData.set(OLD, old);
+    public boolean isAttackable() {
+        return false;
     }
 
     public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource bullcrap) {
@@ -78,13 +65,13 @@ public class ScytheEntity extends PathfinderMob implements IllagerAttack {
         this.setNoGravity(true);
         this.noPhysics = true;
         LivingEntity attacker = this.shooter != null ? this.shooter : this;
-        List<Entity> list = this.level().getEntities(this, new AABB(this.getX() - 0.4, this.getY() - 0.4, this.getZ() - 0.4, this.getX() + 0.4, this.getY() + 0.4, this.getZ() + 0.4), Entity::isAlive);
+        List<Entity> list = this.level().getEntities(this, new AABB(this.getX() - 1.0, this.getY() - 0.4, this.getZ() - 1.0, this.getX() + 1.0, this.getY() + 0.4, this.getZ() + 1.0), Entity::isAlive);
 
         for (Entity entity : list) {
             if (entity instanceof LivingEntity living) {
                 boolean canHurt = attacker instanceof Mob ? EntityUtil.canHurtThisMob(living, (Mob) attacker) : living != this.shooter;
                 if (canHurt && entity.isAlive() && !entity.isInvulnerable() && !entity.isSpectator()) {
-                    living.hurt(this.damageSources().thrown(living, attacker), this.isOld() ? 5.0f : 10.0F);
+                    living.hurt(this.damageSources().thrown(living, attacker), 10.0F);
                     if (!this.shouldReturn && this.goFor == null && !(this.shooter instanceof FreakagerEntity)) {
                         this.goFor = living;
                         this.halfHealth = true;

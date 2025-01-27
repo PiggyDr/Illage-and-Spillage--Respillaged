@@ -2,9 +2,9 @@ package com.yellowbrossproductions.illageandspillage.util;
 
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.items.BagOfHorrorsItemBase;
+import com.yellowbrossproductions.illageandspillage.items.NothingItemBase;
 import com.yellowbrossproductions.illageandspillage.items.SpellboundBookItemBase;
 import com.yellowbrossproductions.illageandspillage.items.TotemOfBanishmentItemBase;
-import com.yellowbrossproductions.illageandspillage.items.NothingItemBase;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.RecordItem;
@@ -41,6 +41,7 @@ public class ItemRegisterer {
     public static final RegistryObject<Item> TREAT4;
     public static final RegistryObject<Item> TREAT5;
     public static final RegistryObject<Item> TREAT6;
+    public static final RegistryObject<Item> GREENBONE;
     public static final RegistryObject<Item> DARK_DRINK;
     public static final RegistryObject<Item> DARK_SPLASH;
     public static final RegistryObject<Item> DARK_LINGER;
@@ -78,6 +79,7 @@ public class ItemRegisterer {
         TREAT4 = ITEMS.register("treat4", NothingItemBase::new);
         TREAT5 = ITEMS.register("treat5", NothingItemBase::new);
         TREAT6 = ITEMS.register("treat6", NothingItemBase::new);
+        GREENBONE = ITEMS.register("greenbone", NothingItemBase::new);
         DARK_DRINK = ITEMS.register("dark_drink", NothingItemBase::new);
         DARK_SPLASH = ITEMS.register("dark_splash", NothingItemBase::new);
         DARK_LINGER = ITEMS.register("dark_linger", NothingItemBase::new);

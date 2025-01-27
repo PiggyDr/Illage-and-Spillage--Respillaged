@@ -4,11 +4,10 @@ import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
-import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
+import com.yellowbrossproductions.illageandspillage.util.ItemRegisterer;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -18,9 +17,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -30,20 +27,10 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.Iterator;
 
 public class BoneEntity extends AbstractHurtingProjectile {
-    public Mob shooter = null;
     public boolean isGoopy;
 
     public BoneEntity(EntityType<? extends AbstractHurtingProjectile> p_36833_, Level p_36834_) {
         super(p_36833_, p_36834_);
-    }
-
-    public BoneEntity(EntityType<? extends AbstractHurtingProjectile> p_36817_, double p_36818_, double p_36819_, double p_36820_, double p_36821_, double p_36822_, double p_36823_, Level p_36824_) {
-        super(ModEntityTypes.Bone.get(), p_36818_, p_36819_, p_36820_, p_36821_, p_36822_, p_36823_, p_36824_);
-    }
-
-    public BoneEntity(EntityType<? extends AbstractHurtingProjectile> p_36826_, LivingEntity p_36827_, double p_36828_, double p_36829_, double p_36830_, Level p_36831_) {
-        super(ModEntityTypes.Bone.get(), p_36827_, p_36828_, p_36829_, p_36830_, p_36831_);
-        this.setOwner(p_36827_);
     }
 
     public BoneEntity(Level p_181151_, LivingEntity p_181152_, double p_181153_, double p_181154_, double p_181155_) {
@@ -69,20 +56,8 @@ public class BoneEntity extends AbstractHurtingProjectile {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_36848_) {
-        super.addAdditionalSaveData(p_36848_);
-        p_36848_.putBoolean("goopy", isGoopy);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag p_36844_) {
-        super.readAdditionalSaveData(p_36844_);
-        this.isGoopy = p_36844_.getBoolean("goopy");
-    }
-
-    @Override
     protected ParticleOptions getTrailParticle() {
-        return new ItemParticleOption(ParticleTypes.ITEM, Items.BONE.getDefaultInstance());
+        return new ItemParticleOption(ParticleTypes.ITEM, ItemRegisterer.GREENBONE.get().getDefaultInstance());
     }
 
     @Override
@@ -91,19 +66,27 @@ public class BoneEntity extends AbstractHurtingProjectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult p_37259_) {
-        super.onHitEntity(p_37259_);
-        Entity attacker = this.shooter != null ? this.shooter : this;
-        boolean canHurt = attacker == this || EntityUtil.canHurtThisMob(p_37259_.getEntity(), this.shooter);
-        if (canHurt) {
-            if (p_37259_.getEntity() instanceof LivingEntity) this.explode((LivingEntity) p_37259_.getEntity());
+    protected void onHitEntity(EntityHitResult p_37386_) {
+        super.onHitEntity(p_37386_);
+        if (!this.level().isClientSide) {
+            Entity entity = p_37386_.getEntity();
+            Entity entity1 = this.getOwner();
+            entity.invulnerableTime = 0;
+            if (entity.hurt(this.damageSources().thrown(this, entity1), 6.0F) && entity instanceof LivingEntity && this.isGoopy) {
+                ((LivingEntity) entity).addEffect(new MobEffectInstance(EffectRegisterer.MUTATION.get(), 100, 1));
+            }
+            if (entity1 instanceof LivingEntity) {
+                this.doEnchantDamageEffects((LivingEntity) entity1, entity);
+            }
+
+            this.explode();
         }
     }
 
     protected void onHit(HitResult p_37406_) {
         super.onHit(p_37406_);
         if (!(p_37406_ instanceof EntityHitResult)) {
-            this.explode(null);
+            this.explode();
         }
     }
 
@@ -141,7 +124,7 @@ public class BoneEntity extends AbstractHurtingProjectile {
                         double d0 = (-0.5 + this.random.nextGaussian());
                         double d1 = (-0.5 + this.random.nextGaussian());
                         double d2 = (-0.5 + this.random.nextGaussian());
-                        packet.queueParticle(new ItemParticleOption(ParticleTypes.ITEM, Items.BONE.getDefaultInstance()), false, new Vec3(this.getRandomX(1.0D), this.getRandomY(), this.getRandomZ(1.0D)), new Vec3(d0, d1, d2));
+                        packet.queueParticle(new ItemParticleOption(ParticleTypes.ITEM, ItemRegisterer.GREENBONE.get().getDefaultInstance()), false, new Vec3(this.getRandomX(1.0D), this.getRandomY(), this.getRandomZ(1.0D)), new Vec3(d0, d1, d2));
                     }
 
                     packet.queueParticle(ParticleTypes.EXPLOSION, false, new Vec3(this.getBoundingBox().getCenter().x, this.getBoundingBox().getCenter().y, this.getBoundingBox().getCenter().z), new Vec3(0, 0, 0));
@@ -162,27 +145,14 @@ public class BoneEntity extends AbstractHurtingProjectile {
         return false;
     }
 
-    public void setShooter(Mob shooter) {
-        this.shooter = shooter;
-    }
-
     @Override
     public boolean hurt(DamageSource source, float amount) {
         return source.is(DamageTypes.GENERIC_KILL) && super.hurt(source, amount);
     }
 
-    private void explode(LivingEntity hit) {
-        Entity attacker = this.shooter != null ? this.shooter : this;
+    private void explode() {
         this.makeExplodeParticles();
         this.playSound(SoundEvents.PLAYER_ATTACK_CRIT, 2.0F, 1.0F);
-
-        if (hit != null && hit != attacker && hit.isAlive() && !hit.isInvulnerable() && !hit.isSpectator()) {
-            hit.hurt(damageSources().thrown(hit, attacker), 6.0F);
-            hit.invulnerableTime = 0;
-            if (this.isGoopy) {
-                hit.addEffect(new MobEffectInstance(EffectRegisterer.MUTATION.get(), 100, 1));
-            }
-        }
 
         if (!this.level().isClientSide) {
             this.discard();

@@ -2,6 +2,7 @@ package com.yellowbrossproductions.illageandspillage.events;
 
 import com.yellowbrossproductions.illageandspillage.client.model.*;
 import com.yellowbrossproductions.illageandspillage.client.render.*;
+import com.yellowbrossproductions.illageandspillage.client.render.layer.HayArmorLayer;
 import com.yellowbrossproductions.illageandspillage.client.render.layer.WebbedLayer;
 import com.yellowbrossproductions.illageandspillage.gui.overlay.JumpscareOverlay;
 import com.yellowbrossproductions.illageandspillage.gui.overlay.WebbedOverlay;
@@ -36,12 +37,14 @@ public class ClientModEventBusSubscriber {
             RenderLayerParent<Player, EntityModel<Player>> layerParent = (RenderLayerParent<Player, EntityModel<Player>>) event.getSkin(model);
             if (layerParent != null) {
                 ((LivingEntityRenderer<Player, EntityModel<Player>>) renderer).addLayer(new WebbedLayer<>(layerParent));
+                ((LivingEntityRenderer<Player, EntityModel<Player>>) renderer).addLayer(new HayArmorLayer<>(layerParent));
             }
         });
 
         Minecraft.getInstance().getEntityRenderDispatcher().renderers.values().forEach(r -> {
             if (r instanceof LivingEntityRenderer) {
                 ((LivingEntityRenderer<?, ?>) r).addLayer(new WebbedLayer<>((RenderLayerParent<?, ?>) r));
+                ((LivingEntityRenderer<?, ?>) r).addLayer(new HayArmorLayer<>((RenderLayerParent<?, ?>) r));
             }
         });
     }
@@ -101,6 +104,7 @@ public class ClientModEventBusSubscriber {
         event.registerLayerDefinition(PumpkinBombModel.LAYER_LOCATION, PumpkinBombModel::createBodyLayer);
         event.registerLayerDefinition(AxeModel.LAYER_LOCATION, AxeModel::createBodyLayer);
         event.registerLayerDefinition(ScytheModel.LAYER_LOCATION, ScytheModel::createBodyLayer);
+        event.registerLayerDefinition(OldScytheModel.LAYER_LOCATION, OldScytheModel::createBodyLayer);
         event.registerLayerDefinition(TrickOrTreatModel.LAYER_LOCATION, TrickOrTreatModel::createBodyLayer);
         event.registerLayerDefinition(WebNetModel.LAYER_LOCATION, WebNetModel::createBodyLayer);
         event.registerLayerDefinition(VillagerSoulModel.LAYER_LOCATION, VillagerSoulModel::createBodyLayer);
@@ -135,7 +139,6 @@ public class ClientModEventBusSubscriber {
 //        event.registerEntityRenderer(ModEntityTypes.Devastator.get(), DevastatorRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.Absorber.get(), AbsorberRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.Preserver.get(), PreserverRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.HayArmor.get(), HayArmorRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.Freakager.get(), FreakagerRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.Ragno.get(), RagnoRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.Eyesore.get(), EyesoreRenderer::new);
@@ -154,6 +157,7 @@ public class ClientModEventBusSubscriber {
         event.registerEntityRenderer(ModEntityTypes.OldAxe.get(), OldAxeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.DarkPotion.get(), (p_174064_) -> new ThrownItemRenderer<>(p_174064_, 0.75F, true));
         event.registerEntityRenderer(ModEntityTypes.Scythe.get(), ScytheRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.OldScythe.get(), OldScytheRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.TrickOrTreat.get(), TrickOrTreatRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.Web.get(), (p_174064_) -> new ThrownItemRenderer<>(p_174064_, 1.5F, true));
         event.registerEntityRenderer(ModEntityTypes.WebNet.get(), WebNetRenderer::new);

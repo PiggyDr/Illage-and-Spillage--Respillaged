@@ -27,6 +27,8 @@ public class StareAtDeadFreakGoal extends Goal {
             this.affectedMob.getNavigation().stop();
             this.affectedMob.setTarget(null);
             this.affectedMob.getLookControl().setLookAt(illagerAttack.getOwner(), 100.0F, 100.0F);
+            this.affectedMob.setYRot(this.affectedMob.getYHeadRot());
+            this.affectedMob.yBodyRot = this.affectedMob.getYRot();
         }
     }
 }

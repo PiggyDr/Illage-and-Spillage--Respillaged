@@ -12,11 +12,11 @@ import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.particle.ParticleRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -45,12 +45,14 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.AngerLevel;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -59,6 +61,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -78,6 +81,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     private static final EntityDataAccessor<Integer> RAGNO_FACE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SHAKE_MULTIPLIER = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> FRAME = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> ANTICHEESE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
     public AnimationState intro1AnimationState = new AnimationState();
     public AnimationState intro2AnimationState = new AnimationState();
     public AnimationState phaseAnimationState = new AnimationState();
@@ -110,6 +114,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     private final int JUMP_ATTACK = 7;
     private final int WEB_NET_ATTACK = 8;
     private final int BREATH_ATTACK = 9;
+    private final int ANTICHEESE_ATTACK = 10;
     private int webCooldown;
     private int webNetCooldown;
     private int jumpCooldown;
@@ -127,7 +132,6 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     public boolean isPlayingPhase;
     public boolean waitingForWeb;
     public int followupTicks;
-    private LivingEntity grabbedEntity;
     public double chargeX;
     public double chargeZ;
     public boolean circleDirection;
@@ -163,7 +167,6 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(0, new StunGoal());
-        this.goalSelector.addGoal(0, new BreathGoal());
         this.goalSelector.addGoal(0, new WebGoal());
         this.goalSelector.addGoal(0, new LeapGoal());
         this.goalSelector.addGoal(0, new WebNetGoal());
@@ -178,6 +181,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, LivingEntity.class, false, (predicate) -> this.isCrazy() && predicate.isAttackable() && predicate != this && !(predicate instanceof Creeper)));
     }
 
     public boolean doHurtTarget(Entity p_21372_) {
@@ -185,11 +189,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 200.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
-    }
-
-    public int getArmorValue() {
-        return 10 + super.getArmorValue();
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.ragno_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0).add(Attributes.ARMOR, 10.0).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
@@ -210,6 +210,11 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         this.entityData.define(STUNNED, false);
         this.entityData.define(ATTACK_TYPE, 0);
         this.entityData.define(ATTACK_TICKS, 0);
+        this.entityData.define(ANTICHEESE, false);
+    }
+
+    public boolean canAttack(LivingEntity target) {
+        return (!(target instanceof IllagerAttack) || ((IllagerAttack) target).getOwner() != this) && super.canAttack(target);
     }
 
     public float getStepHeight() {
@@ -273,6 +278,14 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         this.entityData.set(STUNNED, stunned);
     }
 
+    public boolean isAnticheese() {
+        return this.entityData.get(ANTICHEESE);
+    }
+
+    public void setAnticheese(boolean anticheese) {
+        this.entityData.set(ANTICHEESE, anticheese);
+    }
+
     protected PathNavigation createNavigation(Level p_33802_) {
         return new WallClimberNavigation(this, p_33802_);
     }
@@ -320,7 +333,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
 
     public void setHealth(float p_21154_) {
         float healthValue = p_21154_ - this.getHealth();
-        if (healthValue > 0 || (this.isCrazy() && !this.isBurrowing() && !this.isGrabbing()) || healthValue <= -1000000000000.0F) {
+        if (healthValue > 0 || (this.isCrazy() && !this.isPlayingPhase && !this.isBurrowing() && !this.isGrabbing()) || healthValue <= -1000000000000.0F) {
             if (this.isCrazy() && !this.level().isClientSide) {
                 if (this.getHealth() + healthValue > this.getMaxHealth() / 2) {
                     this.setShakeMultiplier(20);
@@ -398,13 +411,13 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
             this.getCurrentRaid().updateBossbar();
         }
 
-        if (this.owner == null && this.tickCount > 5) {
+        if (this.owner == null && this.tickCount > 5 && !this.isCrazy()) {
             List<FreakagerEntity> list = this.level().getEntitiesOfClass(FreakagerEntity.class, this.getBoundingBox().inflate(2.0));
             if (!list.isEmpty()) {
                 this.owner = list.get(this.random.nextInt(list.size()));
             }
 
-            if (this.owner == null && !this.level().isClientSide && !this.isCrazy()) {
+            if (this.owner == null && !this.level().isClientSide) {
                 this.setCrazy(true);
                 this.setStunHealth(this.getMaxStunHealth());
                 this.setRagnoFace(3);
@@ -412,11 +425,11 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
             }
         }
 
-        if (IllageAndSpillageConfig.freaky_boss_bar.get() && this.isCrazy() && !bossEvent.isVisible()) {
-            bossEvent.setVisible(true);
+        if (IllageAndSpillageConfig.freaky_boss_bar.get() && this.isCrazy() && !this.bossEvent.isVisible()) {
+            this.bossEvent.setVisible(true);
         }
 
-        if (isPlayingIntro) {
+        if (this.isPlayingIntro) {
             this.getNavigation().stop();
             this.getMoveControl().strafe(0.0F, 0.0F);
             if (this.entityToStareAt != null) {
@@ -463,7 +476,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
             }
         }
 
-        if (this.getFrame() == 10 && !this.isPlayingIntro && !this.isPlayingPhase && !isBurrowing() && !isGrabbing()) {
+        if (this.getFrame() == 10 && !this.isPlayingIntro && !this.isPlayingPhase && !this.isBurrowing() && !this.isGrabbing()) {
             this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_WEB.get(), 0.5f, this.getVoicePitch());
             if (this.getRagnoFace() == 0) {
                 this.setRagnoFace(1);
@@ -491,6 +504,9 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                 if (!this.level().isClientSide) {
                     this.stopAttacking();
                     this.setStunned(false);
+                    this.setInvisible(false);
+                    this.setBurrowing(false);
+                    this.setAnticheese(false);
                 }
 
                 this.isPlayingPhase = true;
@@ -553,6 +569,11 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                 this.setCrazy(true);
                 this.setRagnoFace(3);
                 this.setShakeMultiplier(20);
+            }
+
+            List<EyesoreEntity> eyesores = this.level().getEntitiesOfClass(EyesoreEntity.class, this.getBoundingBox().inflate(50.0F), (predicate) -> predicate.getOwner() == this.getOwner());
+            for (EyesoreEntity eyesore : eyesores) {
+                eyesore.setScared(true);
             }
 
             CameraShakeEntity.cameraShake(this.level(), this.position(), 50.0F, 0.1F, 0, 20);
@@ -661,6 +682,11 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
             this.setAttackTicks(0);
             this.setAttackType(0);
             this.setAnimationState(0);
+
+            List<EyesoreEntity> eyesores = this.level().getEntitiesOfClass(EyesoreEntity.class, this.getBoundingBox().inflate(50.0F), (predicate) -> predicate.getOwner() == this.getOwner());
+            for (EyesoreEntity eyesore : eyesores) {
+                eyesore.setScared(false);
+            }
         }
 
         if (this.getAttackType() > 0) {
@@ -683,6 +709,69 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         }
 
         if (this.isAlive()) {
+            if (this.canUseBreath() || this.getAttackType() == BREATH_ATTACK) {
+                this.getNavigation().stop();
+                this.getMoveControl().strafe(0.0F, 0.0F);
+                if (this.getTarget() != null && !this.isGrabbing()) {
+                    this.getLookControl().setLookAt(this.getTarget(), 100.0F, 100.0F);
+                }
+
+                this.getMoveControl().strafe(0.0F, 0.0F);
+                this.navigation.stop();
+
+                if (this.getAttackTicks() == 0) {
+                    this.setAnimationState(18);
+                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_PREPARECHARGE.get(), 2.0F, 0.9F);
+                    this.setAttackType(this.BREATH_ATTACK);
+                }
+
+                if (this.getAttackTicks() == 30) {
+                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_BLOCK.get(), 2.0F, 1.0F);
+
+                    if (!this.level().isClientSide) {
+                        float radius2 = 2.0F;
+                        double x = this.getX() + 0.800000011920929 * Math.sin((double) (-this.getYRot()) * Math.PI / 180.0) + (double) radius2 * Math.sin((double) (-this.yHeadRot) * Math.PI / 180.0) * Math.cos((double) (-this.getXRot()) * Math.PI / 180.0);
+                        double z = this.getZ() + 0.800000011920929 * Math.cos((double) (-this.getYRot()) * Math.PI / 180.0) + (double) radius2 * Math.cos((double) (-this.yHeadRot) * Math.PI / 180.0) * Math.cos((double) (-this.getXRot()) * Math.PI / 180.0);
+                        List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, new AABB(x - 2, this.getY(), z - 2, x + 2, this.getY() + 2, z + 2), (predicate) -> EntityUtil.canHurtThisMob(predicate, this) && isMobNotInCreativeMode(predicate));
+
+                        for (LivingEntity entity : list) {
+                            entity.hurt(this.damageSources().mobAttack(this), 2);
+                            if (!this.isGrabbing() && entity.isAlive() && entity.startRiding(this, true)) {
+                                this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_LEAP.get(), 2.0F, this.getVoicePitch());
+                                this.setGrabbing(true);
+                            }
+                        }
+                    }
+                }
+
+                if (this.getAttackTicks() == 40 && this.isGrabbing()) {
+                    this.setAnimationState(19);
+                }
+
+                if (this.getAttackTicks() == 53) {
+                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_SCREECH.get(), 2.0F, 0.75F);
+                    CameraShakeEntity.cameraShake(this.level(), position(), 50, 0.05f, 48, 20);
+                }
+
+                if (this.getAttackTicks() >= 53 && this.getAttackTicks() <= 109) {
+                    this.makeBreath();
+                }
+
+                if (this.getAttackTicks() == 109 && !this.getPassengers().isEmpty()) {
+                    this.getPassengers().forEach(Entity::stopRiding);
+                }
+
+                if (this.isGrabbing() ? this.getAttackTicks() > 125 : this.getAttackTicks() > 45) {
+                    this.setAnimationState(0);
+                    this.setAttackTicks(0);
+                    this.setAttackType(0);
+                    this.loseStunHealth(this.isGrabbing() ? 10 : 5, false);
+                    this.setGrabbing(false);
+                    this.breathCooldown = 100;
+                    this.attackCooldown = 20;
+                }
+            }
+
             if (this.getAttackType() == this.WEB_ATTACK && this.isCrazy()) {
                 LivingEntity entity = this.getTarget();
                 if (this.getAttackTicks() == 4) {
@@ -844,6 +933,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                                     entity2.hurt(this.damageSources().mobAttack(this), 20.0F);
                                     entity2.setDeltaMovement(entity2.getDeltaMovement().add((-x2 / d * 5.0) - entity2.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), (-y / d * 2.0) - entity2.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), (-z2 / d * 5.0) - entity2.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)));
                                     if (entity2.isBlocking()) {
+                                        entity2.getUseItem().hurtAndBreak(60, entity2, (p_289501_) -> p_289501_.broadcastBreakEvent(entity2.getUsedItemHand()));
                                         EntityUtil.disableShield(entity2, 400);
                                     }
                                 }
@@ -853,7 +943,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                 }
             }
 
-            if (this.getAttackType() == this.LEAP_ATTACK && this.isCrazy()) {
+            if (this.getAttackType() == this.LEAP_ATTACK) {
                 LivingEntity target = this.getTarget();
                 double targetX = 0.0;
                 double motionY = 0.0;
@@ -886,7 +976,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
 
                 if (this.shouldHurtOnTouch) {
                     for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
-                        if (EntityUtil.canHurtThisMob(entity, this) && entity instanceof LivingEntity && entity.isAlive()) {
+                        if (EntityUtil.canHurtThisMob(entity, this) && entity instanceof LivingEntity && entity.isAlive() && ((!(entity instanceof TrickOrTreatEntity) && !(entity instanceof FunnyboneEntity) && !(entity instanceof EyesoreEntity)) || entity.tickCount > 20)) {
                             double deltaX = this.getX() - entity.getX();
                             double deltaY = this.getY() - entity.getY();
                             double deltaZ = this.getZ() - entity.getZ();
@@ -949,7 +1039,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
 
                 if (this.getAttackTicks() >= 7) {
                     for (Entity hit : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
-                        if (EntityUtil.canHurtThisMob(hit, this) && hit instanceof LivingEntity && hit.isAlive() && hit != this) {
+                        if (EntityUtil.canHurtThisMob(hit, this) && hit instanceof LivingEntity && hit.isAlive() && hit != this && ((!(hit instanceof TrickOrTreatEntity) && !(hit instanceof FunnyboneEntity) && !(hit instanceof EyesoreEntity)) || hit.tickCount > 20)) {
                             double deltaX = this.getX() - hit.getX();
                             double deltaY = this.getY() - hit.getY();
                             double deltaZ = this.getZ() - hit.getZ();
@@ -1086,17 +1176,15 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     }
 
                     Entity target = this.getTarget();
-                    double posX = this.getX();
-                    double posY = this.getY();
-                    double posZ = this.getZ();
                     if (this.getAttackTicks() < (this.halfHealth() ? 40 : 100)) {
                         this.setInvisible(true);
-                        posX = target.getX();
-                        posY = target.getY();
-                        posZ = target.getZ();
+                        double targetX = target.getX();
+                        double targetZ = target.getZ();
+                        double d0 = Math.min(target.getY(), this.getY());
+                        double d1 = Math.max(target.getY(), this.getY());
+                        this.setPos(this.getBurrowPosition(targetX, targetZ, d0, d1));
                     }
 
-                    this.setPos(posX, posY, posZ);
                     this.setDeltaMovement(0.0, 0.0, 0.0);
 
                     if (this.getAttackTicks() == (this.halfHealth() ? 49 : 119)) {
@@ -1121,6 +1209,9 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                                     entity.hurtMarked = true;
                                     entity.setDeltaMovement(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 0.8, -deltaZ / distance * 2.0);
                                     entity.lerpMotion(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 0.8, -deltaZ / distance * 2.0);
+                                    if (((LivingEntity) entity).isBlocking()) {
+                                        EntityUtil.disableShield((LivingEntity) entity, 200);
+                                    }
                                 }
                             }
                         }
@@ -1157,7 +1248,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     double deltaZ = this.getZ() - target.getZ();
                     double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_CHARGE.get(), 2.0F, this.getVoicePitch());
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_RAGNO_CHARGE.get(), 2.0F, this.getVoicePitch(), false);
 
                     float power = 4.5F;
                     double motionX = -(deltaX / distance * power * 0.2);
@@ -1183,7 +1274,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     this.setDeltaMovement(this.chargeX, this.getDeltaMovement().y, this.chargeZ);
 
                     for (Entity hit : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
-                        if (EntityUtil.canHurtThisMob(hit, this) && hit instanceof LivingEntity && hit.isAlive() && hit != this) {
+                        if (EntityUtil.canHurtThisMob(hit, this) && hit instanceof LivingEntity && hit.isAlive() && hit != this && ((!(hit instanceof TrickOrTreatEntity) && !(hit instanceof FunnyboneEntity) && !(hit instanceof EyesoreEntity)) || hit.tickCount > 20)) {
                             double deltaX = this.getX() - hit.getX();
                             double deltaY = this.getY() - hit.getY();
                             double deltaZ = this.getZ() - hit.getZ();
@@ -1195,13 +1286,16 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                                 hit.hurtMarked = true;
                                 hit.setDeltaMovement(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 1.2, -deltaZ / distance * 2.0);
                                 hit.lerpMotion(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 1.2, -deltaZ / distance * 2.0);
+                                if (((LivingEntity) hit).isBlocking()) {
+                                    EntityUtil.disableShield((LivingEntity) hit, 200);
+                                }
                             }
                         }
                     }
                 }
             }
 
-            if (!isPlayingIntro && !isPlayingPhase && !this.isCrazy() && ((this.doesAttackMeetNormalRequirements() && this.distanceToSqr(this.getTarget()) > 1225 && this.chargeCooldown < 1) || getAttackType() == CHARGE_ATTACK)) {
+            if (!this.isPlayingIntro && !this.isPlayingPhase && !this.isCrazy() && ((this.doesAttackMeetNormalRequirements() && this.distanceToSqr(this.getTarget()) > 1225 && this.chargeCooldown < 1) || getAttackType() == CHARGE_ATTACK)) {
                 if (getAttackTicks() == 0) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_PREPARECHARGE.get(), 2.0F, 0.9F);
                     this.setAnimationState(8);
@@ -1233,7 +1327,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     double deltaZ = this.getZ() - target.getZ();
                     double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_CHARGE.get(), 2.0F, this.getVoicePitch());
+                    EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_RAGNO_CHARGE.get(), 2.0F, this.getVoicePitch(), false);
 
                     float power = 4.5F;
                     double motionX = -(deltaX / distance * power * 0.2);
@@ -1247,7 +1341,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                     this.setDeltaMovement(this.chargeX, this.getDeltaMovement().y, this.chargeZ);
 
                     for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
-                        if (EntityUtil.canHurtThisMob(entity, this) && entity instanceof LivingEntity && entity.isAlive() && entity != this) {
+                        if (EntityUtil.canHurtThisMob(entity, this) && entity instanceof LivingEntity && entity.isAlive() && entity != this && ((!(entity instanceof TrickOrTreatEntity) && !(entity instanceof FunnyboneEntity) && !(entity instanceof EyesoreEntity)) || entity.tickCount > 20)) {
                             double deltaX = this.getX() - entity.getX();
                             double deltaY = this.getY() - entity.getY();
                             double deltaZ = this.getZ() - entity.getZ();
@@ -1259,6 +1353,9 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                                 entity.hurtMarked = true;
                                 entity.setDeltaMovement(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 1.2, -deltaZ / distance * 2.0);
                                 entity.lerpMotion(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 1.2, -deltaZ / distance * 2.0);
+                                if (((LivingEntity) entity).isBlocking()) {
+                                    EntityUtil.disableShield((LivingEntity) entity, 200);
+                                }
                             }
                         }
                     }
@@ -1369,75 +1466,94 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
                 }
             }
 
-            if (this.getAttackType() == BREATH_ATTACK) {
-                if (this.getAttackTicks() == 21) {
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_BLOCK.get(), 2.0F, 1.0F);
+            if (this.isAnticheese() || this.getAttackType() == this.ANTICHEESE_ATTACK) {
+                if (this.getAttackTicks() == 0) {
+                    this.setAttackType(RagnoEntity.this.ANTICHEESE_ATTACK);
+                }
 
-                    if (!this.level().isClientSide) {
-                        float radius2 = 2.0F;
-                        double x = this.getX() + 0.800000011920929 * Math.sin((double) (-this.getYRot()) * Math.PI / 180.0) + (double) radius2 * Math.sin((double) (-this.yHeadRot) * Math.PI / 180.0) * Math.cos((double) (-this.getXRot()) * Math.PI / 180.0);
-                        double z = this.getZ() + 0.800000011920929 * Math.cos((double) (-this.getYRot()) * Math.PI / 180.0) + (double) radius2 * Math.cos((double) (-this.yHeadRot) * Math.PI / 180.0) * Math.cos((double) (-this.getXRot()) * Math.PI / 180.0);
-                        List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, new AABB(x - 2, this.getY(), z - 2, x + 2, this.getY() + 2, z + 2), (predicate) -> EntityUtil.canHurtThisMob(predicate, this) && isMobNotInCreativeMode(predicate));
+                if (this.getAttackTicks() == 30) {
+                    this.setAnimationState(6);
+                }
 
-                        for (LivingEntity entity : list) {
-                            entity.hurt(this.damageSources().mobAttack(this), 2);
-                            if (!this.isGrabbing() && entity.isAlive()) {
-                                this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_LEAP.get(), 2.0F, this.getVoicePitch());
-                                this.grabbedEntity = entity;
-                                this.setGrabbing(true);
+                if (this.getAttackTicks() > 36 && this.getAttackTicks() <= 60) {
+                    this.playSound(SoundEvents.GRAVEL_BREAK, 2.0F, 0.7F);
+                    this.makeBlockParticles(this.getBlockStateOn());
+                    this.setBurrowing(true);
+                }
 
-                                float radius = 3.0F;
-                                float angle = 0.017453292F * this.yBodyRot;
-                                double extraX = radius * Mth.sin((float) (Math.PI + (double) angle));
-                                double extraZ = radius * Mth.cos(angle);
+                if (this.getAttackTicks() >= 60 && this.getTarget() != null) {
+                    this.clearFire();
+                    if (this.getAttackTicks() < 70) {
+                        this.playSound(SoundEvents.STONE_BREAK, 2.0F, 0.5F);
+                    }
 
-                                if (this.grabbedEntity instanceof ServerPlayer serverPlayer) {
-                                    this.grabbedEntity.teleportTo(this.getX() + extraX, this.getY() + 0.75, this.getZ() + extraZ);
-                                    serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(this.grabbedEntity.getId(), new Vec3(0, 0, 0)));
-                                } else {
-                                    this.grabbedEntity.setPos(this.getX() + extraX, this.getY() + 0.75, this.getZ() + extraZ);
-                                    this.grabbedEntity.setDeltaMovement(0, 0, 0);
+                    Entity target = this.getTarget();
+                    if (this.getAttackTicks() < 70) {
+                        this.setInvisible(true);
+                        double targetX = target.getX();
+                        double targetZ = target.getZ();
+                        double d0 = Math.min(target.getY(), this.getY());
+                        double d1 = Math.max(target.getY(), this.getY());
+                        this.setPos(this.getBurrowPosition(targetX, targetZ, d0, d1));
+                    }
+
+                    this.setDeltaMovement(0.0, 0.0, 0.0);
+
+                    if (this.getAttackTicks() == 79) {
+                        this.setAnimationState(7);
+                    }
+
+                    if (this.getAttackTicks() == 80) {
+                        this.makeBlockParticles(this.getBlockStateOn());
+                        this.setInvisible(false);
+                        CameraShakeEntity.cameraShake(this.level(), this.position(), 50.0F, 0.05F, 0, 30);
+                        this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_SLAM.get(), 2.0F, 1.6F);
+                        this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_SLAM.get(), 2.0F, 1.2F);
+                        for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(15.0))) {
+                            if (EntityUtil.canHurtThisMob(entity, this) && entity instanceof LivingEntity && entity.isAlive() && entity != this) {
+                                double deltaX = this.getX() - entity.getX();
+                                double deltaY = this.getY() - entity.getY();
+                                double deltaZ = this.getZ() - entity.getZ();
+                                double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+                                if (this.distanceToSqr(entity) < 9.0 && entity.invulnerableTime <= 0) {
+                                    this.playSound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 1.0F, 1.0F);
+                                    entity.hurt(this.damageSources().mobAttack(this), 8.0F);
+                                    entity.hurtMarked = true;
+                                    entity.setDeltaMovement(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 0.8, -deltaZ / distance * 2.0);
+                                    entity.lerpMotion(-deltaX / distance * 2.0, -deltaY / distance * 2.0 + 0.8, -deltaZ / distance * 2.0);
+                                    if (((LivingEntity) entity).isBlocking()) {
+                                        EntityUtil.disableShield((LivingEntity) entity, 200);
+                                    }
                                 }
                             }
                         }
+                        this.setDeltaMovement(0.0, 0.0, 0.0);
                     }
                 }
 
-                if (this.getAttackTicks() >= 21 && this.getAttackTicks() < 99 && this.grabbedEntity != null) {
-                    float radius = 3.0F;
-                    float angle = 0.017453292F * this.yBodyRot;
-                    double extraX = radius * Mth.sin((float) (Math.PI + (double) angle));
-                    double extraZ = radius * Mth.cos(angle);
+                this.getNavigation().stop();
+                this.getMoveControl().strafe(0.0F, 0.0F);
+                if (this.getTarget() != null) {
+                    this.getLookControl().setLookAt(this.getTarget(), 100.0F, 100.0F);
+                }
 
-                    if (this.grabbedEntity.distanceToSqr(this.getX() + extraX, this.getY() + 0.75, this.getZ() + extraZ) <= 2.25) {
-                        if (this.grabbedEntity instanceof ServerPlayer serverPlayer) {
-                            this.grabbedEntity.teleportTo(this.getX() + extraX, this.getY() + 0.75, this.getZ() + extraZ);
-                            serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(this.grabbedEntity.getId(), new Vec3(0, 0, 0)));
-                        } else {
-                            this.grabbedEntity.setPos(this.getX() + extraX, this.getY() + 0.75, this.getZ() + extraZ);
-                            this.grabbedEntity.setDeltaMovement(0, 0, 0);
-                        }
-                    } else {
-                        this.grabbedEntity = null;
+                this.getMoveControl().strafe(0.0F, 0.0F);
+                this.navigation.stop();
+
+                if (this.getAttackTicks() > 98) {
+                    this.setAnimationState(0);
+                    this.setAttackTicks(0);
+                    this.setAttackType(0);
+                    this.setInvisible(false);
+                    this.setBurrowing(false);
+                    if (!this.level().isClientSide) {
+                        this.setAnticheese(false);
                     }
-                }
-
-                if (this.getAttackTicks() == 30 && this.isGrabbing()) {
-                    this.setAnimationState(19);
-                }
-
-                if (this.getAttackTicks() == 43) {
-                    this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_SCREECH.get(), 2.0F, 0.75F);
-                    CameraShakeEntity.cameraShake(this.level(), position(), 50, 0.05f, 48, 20);
-                }
-
-                if (this.getAttackTicks() >= 43 && this.getAttackTicks() <= 99) {
-                    this.makeBreath();
                 }
             }
         }
 
-        if (this.getAttackType() == 0 && !this.isPlayingIntro && !isPlayingPhase && this.getTarget() != null && !this.isStunned()) {
+        if (this.getAttackType() == 0 && !this.isPlayingIntro && !this.isPlayingPhase && this.getTarget() != null && !this.isStunned()) {
             this.circleTarget(this.getTarget(), 10.0F, 0.8F, true, this.circleTick, 0.0F, 1.0F);
             this.lookAt(this.getTarget(), 100.0F, 100.0F);
             this.getLookControl().setLookAt(this.getTarget(), 100.0F, 100.0F);
@@ -1483,6 +1599,70 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         super.tick();
         this.setYRot(this.getYHeadRot());
         this.yBodyRot = this.getYRot();
+    }
+
+    @Override
+    protected void positionRider(Entity passenger, MoveFunction moveFunction) {
+        if (this.isCrazy() && (this.phaseTicks < 1 || this.phaseTicks > 250)) {
+            float radius = 3.0F;
+            float angle = 0.017453292F * this.yBodyRot;
+            double x = this.getX() + (radius * Mth.sin((float) (Math.PI + (double) angle)));
+            double z = this.getZ() + (radius * Mth.cos(angle));
+            moveFunction.accept(passenger, x, this.getY() + 0.75, z);
+        } else {
+            super.positionRider(passenger, moveFunction);
+        }
+    }
+
+    @Override
+    public @NotNull Vec3 getDismountLocationForPassenger(@NotNull LivingEntity p_29487_) {
+        Direction direction = this.getMotionDirection();
+        if (direction.getAxis() != Direction.Axis.Y) {
+            int[][] aint = DismountHelper.offsetsForDirection(direction);
+            BlockPos blockpos = this.blockPosition();
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+            for (Pose pose : p_29487_.getDismountPoses()) {
+                AABB aabb = p_29487_.getLocalBoundsForPose(pose);
+
+                for (int[] aint1 : aint) {
+                    blockpos$mutableblockpos.set(blockpos.getX() + aint1[0], blockpos.getY(), blockpos.getZ() + aint1[1]);
+                    double d0 = this.level().getBlockFloorHeight(blockpos$mutableblockpos);
+                    if (DismountHelper.isBlockFloorValid(d0)) {
+                        Vec3 vec3 = Vec3.upFromBottomCenterOf(blockpos$mutableblockpos, d0);
+                        if (DismountHelper.canDismountTo(this.level(), p_29487_, aabb.move(vec3))) {
+                            p_29487_.setPose(pose);
+                            return vec3;
+                        }
+                    }
+                }
+            }
+
+        }
+        return super.getDismountLocationForPassenger(p_29487_);
+    }
+
+    @Override
+    public boolean shouldRiderSit() {
+        return !this.isCrazy();
+    }
+
+    private Vec3 getBurrowPosition(double p_32673_, double p_32674_, double p_32675_, double p_32676_) {
+        BlockPos blockpos = BlockPos.containing(p_32673_, p_32676_, p_32674_);
+        boolean flag = false;
+
+        do {
+            BlockPos blockpos1 = blockpos.below();
+            BlockState blockstate = this.level().getBlockState(blockpos1);
+            if (blockstate.isFaceSturdy(this.level(), blockpos1, Direction.UP)) {
+                flag = true;
+                break;
+            }
+
+            blockpos = blockpos.below();
+        } while (blockpos.getY() >= Mth.floor(p_32675_) - 1);
+
+        return flag ? new Vec3(p_32673_, blockpos.getY(), p_32674_) : this.position();
     }
 
     public int getAttackType() {
@@ -1533,6 +1713,10 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         this.stopAttacking();
         this.setBurrowing(false);
         this.setGrabbing(false);
+
+        if (!this.getPassengers().isEmpty()) {
+            this.getPassengers().forEach(Entity::stopRiding);
+        }
 
         if (this.hasActiveRaid() && this.getCurrentRaid() != null) {
             this.getCurrentRaid().ticksActive = 0L;
@@ -1772,7 +1956,6 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     public void stopAttackersFromAttacking() {
         List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
         if (this.getOwner() != null && this.getOwner().isAlive()) {
-
             for (Mob attacker : list) {
                 if (attacker.getLastHurtByMob() == this && this.getOwner() != null) {
                     attacker.setLastHurtByMob(this.getOwner());
@@ -1814,7 +1997,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         } else {
             if (this.isAlive() && !damageSource.is(DamageTypes.FELL_OUT_OF_WORLD) && !damageSource.is(DamageTypes.GENERIC_KILL) && (!this.isCrazy() || isMobNotInCreativeMode(damageSource.getEntity()))) {
                 boolean source;
-                if (!this.isCrazy()) {
+                if (!this.isCrazy() || this.isPlayingPhase) {
                     source = !damageSource.is(DamageTypeTags.BYPASSES_ARMOR);
                     if (!this.isStunned() && source && this.blockTicks < 1 && (this.entityData.get(ANIMATION_STATE) == 0 || this.entityData.get(ANIMATION_STATE) == 3 || this.entityData.get(ANIMATION_STATE) == 15)) {
                         this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_BLOCK.get(), 2.0F, 1.0F);
@@ -1886,7 +2069,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     }
 
     public boolean isPersistenceRequired() {
-        return true;
+        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     public double getPassengersRidingOffset() {
@@ -2106,14 +2289,18 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
 
     public int getMaxStunHealth() {
         if (this.isCrazy()) {
-            return this.halfHealth() ? 70 : 110;
+            return this.halfHealth() ? 70 : 90;
         } else {
             return 50;
         }
     }
 
     public boolean doesAttackMeetNormalRequirements() {
-        return this.getAttackType() == 0 && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.attackCooldown < 1 && !this.isStunned() && !this.isPlayingIntro && !isPlayingPhase;
+        return this.getAttackType() == 0 && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.attackCooldown < 1 && !this.isStunned() && !this.isPlayingIntro && !this.isPlayingPhase && !this.isAnticheese() && !this.canUseBreath();
+    }
+
+    public boolean canUseBreath() {
+        return this.getAttackType() == 0 && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.attackCooldown < 1 && !this.isStunned() && !this.isPlayingIntro && !this.isPlayingPhase && !this.isAnticheese() && this.halfHealth() && this.breathCooldown < 1 && this.isCrazy() && this.distanceToSqr(this.getTarget()) < 36.0;
     }
 
     static {
@@ -2139,7 +2326,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         }
 
         public boolean canContinueToUse() {
-            return RagnoEntity.this.stunTick <= 114;
+            return RagnoEntity.this.stunTick <= 114 && this.canUse();
         }
 
         public void tick() {
@@ -2250,7 +2437,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         }
 
         public boolean canUse() {
-            return RagnoEntity.this.doesAttackMeetNormalRequirements() && (RagnoEntity.this.halfHealth() || RagnoEntity.this.random.nextInt(16) == 0) && RagnoEntity.this.leapCooldown < 1 && RagnoEntity.this.getTarget() != null && RagnoEntity.this.distanceToSqr(RagnoEntity.this.getTarget()) < 144.0;
+            return RagnoEntity.this.doesAttackMeetNormalRequirements() && (RagnoEntity.this.halfHealth() || RagnoEntity.this.random.nextInt(16) == 0) && RagnoEntity.this.leapCooldown < 1 && RagnoEntity.this.getTarget() != null && RagnoEntity.this.distanceToSqr(RagnoEntity.this.getTarget()) < 144.0 && RagnoEntity.this.isCrazy();
         }
 
         public void start() {
@@ -2292,7 +2479,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
         }
 
         public boolean canUse() {
-            return RagnoEntity.this.doesAttackMeetNormalRequirements() && (RagnoEntity.this.halfHealth() || RagnoEntity.this.random.nextInt(16) == 0) && RagnoEntity.this.burrowCooldown < 1 && RagnoEntity.this.isCrazy();
+            return RagnoEntity.this.doesAttackMeetNormalRequirements() && RagnoEntity.this.onGround() && (RagnoEntity.this.halfHealth() || RagnoEntity.this.random.nextInt(16) == 0) && RagnoEntity.this.burrowCooldown < 1 && RagnoEntity.this.isCrazy();
         }
 
         public void start() {
@@ -2402,48 +2589,6 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
             RagnoEntity.this.setAttackType(0);
             RagnoEntity.this.loseStunHealth(5, false);
             RagnoEntity.this.coughCooldown = 200;
-            RagnoEntity.this.attackCooldown = 20;
-        }
-    }
-
-    class BreathGoal extends Goal {
-        public BreathGoal() {
-            this.setFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
-        }
-
-        public boolean canUse() {
-            return RagnoEntity.this.doesAttackMeetNormalRequirements() && RagnoEntity.this.halfHealth() && RagnoEntity.this.breathCooldown < 1 && RagnoEntity.this.isCrazy() && RagnoEntity.this.distanceToSqr(RagnoEntity.this.getTarget()) < 36.0;
-        }
-
-        public void start() {
-            RagnoEntity.this.setAnimationState(18);
-            RagnoEntity.this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_PREPARECHARGE.get(), 2.0F, 0.9F);
-            RagnoEntity.this.setAttackType(RagnoEntity.this.BREATH_ATTACK);
-        }
-
-        public boolean canContinueToUse() {
-            return RagnoEntity.this.isGrabbing() ? RagnoEntity.this.getAttackTicks() <= 109 : RagnoEntity.this.getAttackTicks() <= 35;
-        }
-
-        public void tick() {
-            RagnoEntity.this.getNavigation().stop();
-            RagnoEntity.this.getMoveControl().strafe(0.0F, 0.0F);
-            if (RagnoEntity.this.getTarget() != null && !RagnoEntity.this.isGrabbing()) {
-                RagnoEntity.this.getLookControl().setLookAt(RagnoEntity.this.getTarget(), 100.0F, 100.0F);
-            }
-
-            RagnoEntity.this.getMoveControl().strafe(0.0F, 0.0F);
-            RagnoEntity.this.navigation.stop();
-        }
-
-        public void stop() {
-            RagnoEntity.this.setAnimationState(0);
-            RagnoEntity.this.setAttackTicks(0);
-            RagnoEntity.this.setAttackType(0);
-            RagnoEntity.this.loseStunHealth(RagnoEntity.this.isGrabbing() ? 10 : 5, false);
-            RagnoEntity.this.setGrabbing(false);
-            RagnoEntity.this.grabbedEntity = null;
-            RagnoEntity.this.breathCooldown = 100;
             RagnoEntity.this.attackCooldown = 20;
         }
     }

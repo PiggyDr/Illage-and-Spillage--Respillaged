@@ -53,6 +53,10 @@ public class WebEntity extends PathfinderMob implements IllagerAttack, ItemSuppl
         return false;
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean canBeAffected(MobEffectInstance p_21197_) {
         return false;
     }
@@ -66,7 +70,6 @@ public class WebEntity extends PathfinderMob implements IllagerAttack, ItemSuppl
         this.noPhysics = true;
         Mob attacker = this.shooter != null ? this.shooter : this;
         List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, new AABB(this.getX() - 0.4, this.getY() - 0.4, this.getZ() - 0.4, this.getX() + 0.4, this.getY() + 0.4, this.getZ() + 0.4), Entity::isAlive);
-
         for (LivingEntity entity : list) {
             if (EntityUtil.canHurtThisMob(entity, attacker) && entity.isAlive() && !entity.isInvulnerable() && !entity.isSpectator() && !entity.hasEffect(EffectRegisterer.WEBBED.get())) {
                 this.playSound(IllageAndSpillageSoundEvents.ENTITY_RAGNO_WEB_HIT.get(), 1.0F, this.getVoicePitch());

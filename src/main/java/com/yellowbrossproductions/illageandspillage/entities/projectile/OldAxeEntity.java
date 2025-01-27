@@ -46,6 +46,10 @@ public class OldAxeEntity extends PathfinderMob implements IllagerAttack {
         return false;
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean canBeAffected(MobEffectInstance p_21197_) {
         return false;
     }

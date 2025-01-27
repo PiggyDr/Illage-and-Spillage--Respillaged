@@ -116,15 +116,4 @@ public class PokerEntity extends Raider implements FactoryMinion, IllagerAttack 
     public void setOwner(FactoryEntity owner) {
         this.owner = owner;
     }
-
-//    private static class PokerPokeGoal extends MeleeAttackGoal {
-//        public PokerPokeGoal(PathfinderMob p_25552_, double p_25553_, boolean p_25554_) {
-//            super(p_25552_, p_25553_, p_25554_);
-//        }
-//
-//        @Override
-//        protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
-//            super.checkAndPerformAttack(p_25557_, p_25558_);
-//        }
-//    }
 }

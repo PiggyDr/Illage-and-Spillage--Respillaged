@@ -36,6 +36,10 @@ public class ImpEntity extends Mob implements IllagerAttack {
         return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 20.0).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean canBeAffected(MobEffectInstance p_21197_) {
         return false;
     }

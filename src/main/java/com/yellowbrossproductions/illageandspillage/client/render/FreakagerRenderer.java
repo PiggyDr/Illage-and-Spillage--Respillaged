@@ -8,6 +8,7 @@ import com.yellowbrossproductions.illageandspillage.client.render.layer.freakage
 import com.yellowbrossproductions.illageandspillage.client.render.layer.freakager.FreakagerVillaFaceLayer;
 import com.yellowbrossproductions.illageandspillage.entities.FreakagerEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
@@ -36,6 +37,11 @@ public class FreakagerRenderer<T extends FreakagerEntity> extends MobRenderer<T,
 
             }
         });
+    }
+
+    @Override
+    public boolean shouldRender(T p_115468_, Frustum p_115469_, double p_115470_, double p_115471_, double p_115472_) {
+        return !p_115468_.isPhasedOut() && super.shouldRender(p_115468_, p_115469_, p_115470_, p_115471_, p_115472_);
     }
 
     @Override

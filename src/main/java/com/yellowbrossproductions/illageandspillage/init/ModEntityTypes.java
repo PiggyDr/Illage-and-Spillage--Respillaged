@@ -1,5 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.init;
 
+
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.*;
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +41,6 @@ public class ModEntityTypes {
     //    public static final RegistryObject<EntityType<DevastatorEntity>> Devastator;
     public static final RegistryObject<EntityType<AbsorberEntity>> Absorber;
     public static final RegistryObject<EntityType<PreserverEntity>> Preserver;
-    public static final RegistryObject<EntityType<HayArmorEntity>> HayArmor;
     public static final RegistryObject<EntityType<FreakagerEntity>> Freakager;
     public static final RegistryObject<EntityType<RagnoEntity>> Ragno;
     public static final RegistryObject<EntityType<EyesoreEntity>> Eyesore;
@@ -59,6 +59,7 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<OldAxeEntity>> OldAxe;
     public static final RegistryObject<EntityType<DarkPotionEntity>> DarkPotion;
     public static final RegistryObject<EntityType<ScytheEntity>> Scythe;
+    public static final RegistryObject<EntityType<OldScytheEntity>> OldScythe;
     public static final RegistryObject<EntityType<TrickOrTreatEntity>> TrickOrTreat;
     public static final RegistryObject<EntityType<WebEntity>> Web;
     public static final RegistryObject<EntityType<WebNetEntity>> WebNet;
@@ -89,7 +90,6 @@ public class ModEntityTypes {
 //        event.put(Devastator.get(), DevastatorEntity.createAttributes().build());
         event.put(Absorber.get(), AbsorberEntity.createAttributes().build());
         event.put(Preserver.get(), PreserverEntity.createAttributes().build());
-        event.put(HayArmor.get(), HayArmorEntity.createAttributes().build());
         event.put(Freakager.get(), FreakagerEntity.createAttributes().build());
         event.put(Ragno.get(), RagnoEntity.createAttributes().build());
         event.put(Eyesore.get(), EyesoreEntity.createAttributes().build());
@@ -103,6 +103,7 @@ public class ModEntityTypes {
         event.put(PumpkinBomb.get(), PumpkinBombEntity.createAttributes().build());
         event.put(OldAxe.get(), OldAxeEntity.createAttributes().build());
         event.put(Scythe.get(), ScytheEntity.createAttributes().build());
+        event.put(OldScythe.get(), OldScytheEntity.createAttributes().build());
         event.put(TrickOrTreat.get(), TrickOrTreatEntity.createAttributes().build());
         event.put(Web.get(), WebEntity.createAttributes().build());
         event.put(WebNet.get(), WebNetEntity.createAttributes().build());
@@ -140,7 +141,6 @@ public class ModEntityTypes {
 //        });
         Absorber = ENTITY_TYPES.register("absorber", () -> Builder.of(AbsorberEntity::new, MobCategory.MONSTER).sized(1.3F, 2.9F).build((new ResourceLocation("illageandspillage", "absorber")).toString()));
         Preserver = ENTITY_TYPES.register("preserver", () -> Builder.of(PreserverEntity::new, MobCategory.MONSTER).sized(1.1F, 1.95F).build((new ResourceLocation("illageandspillage", "preserver")).toString()));
-        HayArmor = ENTITY_TYPES.register("hay_armor", () -> Builder.of(HayArmorEntity::new, MobCategory.MISC).sized(1.0F, 1.0F).build((new ResourceLocation("illageandspillage", "hay_armor")).toString()));
         Freakager = ENTITY_TYPES.register("freakager", () -> Builder.of(FreakagerEntity::new, MobCategory.MONSTER).sized(0.6F, 1.95F).build((new ResourceLocation("illageandspillage", "freakager")).toString()));
         Ragno = ENTITY_TYPES.register("ragno", () -> Builder.of(RagnoEntity::new, MobCategory.MONSTER).sized(3.2F, 1.8F).build((new ResourceLocation("illageandspillage", "ragno")).toString()));
         Eyesore = ENTITY_TYPES.register("eyesore", () -> Builder.of(EyesoreEntity::new, MobCategory.MONSTER).sized(0.8F, 0.8F).build((new ResourceLocation("illageandspillage", "eyesore")).toString()));
@@ -159,6 +159,7 @@ public class ModEntityTypes {
         OldAxe = ENTITY_TYPES.register("old_axe", () -> Builder.of(OldAxeEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "old_axe")).toString()));
         DarkPotion = ENTITY_TYPES.register("dark_potion", () -> Builder.of(DarkPotionEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(1).build((new ResourceLocation("illageandspillage", "dark_potion")).toString()));
         Scythe = ENTITY_TYPES.register("scythe", () -> Builder.of(ScytheEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "scythe")).toString()));
+        OldScythe = ENTITY_TYPES.register("old_scythe", () -> Builder.of(OldScytheEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "old_scythe")).toString()));
         TrickOrTreat = ENTITY_TYPES.register("trick_or_treat", () -> Builder.of(TrickOrTreatEntity::new, MobCategory.MONSTER).sized(1.0F, 1.8F).build((new ResourceLocation("illageandspillage", "trick_or_treat")).toString()));
         Web = ENTITY_TYPES.register("web", () -> Builder.of(WebEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "web")).toString()));
         WebNet = ENTITY_TYPES.register("web_net", () -> Builder.of(WebNetEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "web_net")).toString()));

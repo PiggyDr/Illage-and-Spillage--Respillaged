@@ -2,11 +2,15 @@ package com.yellowbrossproductions.illageandspillage.events;
 
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.CameraShakeEntity;
+import com.yellowbrossproductions.illageandspillage.entities.RagnoEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
@@ -16,9 +20,9 @@ public enum ClientEventHandler {
     @SubscribeEvent
     public void onSetupCamera(ViewportEvent.ComputeCameraAngles event) {
         Player player = Minecraft.getInstance().player;
-        float delta = Minecraft.getInstance().getFrameTime();
-        float ticksExistedDelta = (float) player.tickCount + delta;
-        if (IllageAndSpillageConfig.cameraShakesAllowed.get()) {
+        if (IllageAndSpillageConfig.cameraShakesAllowed.get() && !Minecraft.getInstance().isPaused() && player != null) {
+            float delta = Minecraft.getInstance().getFrameTime();
+            float ticksExistedDelta = (float) player.tickCount + delta;
             float shakeAmplitude = 0.0F;
 
             for (CameraShakeEntity cameraShake : player.level().getEntitiesOfClass(CameraShakeEntity.class, player.getBoundingBox().inflate(100.0))) {
@@ -36,5 +40,13 @@ public enum ClientEventHandler {
             event.setRoll((float) ((double) event.getRoll() + (double) shakeAmplitude * Math.cos((ticksExistedDelta * 4.0F)) * 25.0));
         }
 
+    }
+
+    @SubscribeEvent
+    public void onPreRenderHUD(RenderGuiOverlayEvent.Pre event) {
+        Player player = Minecraft.getInstance().player;
+        if (player != null && player.isPassenger() && player.getVehicle() instanceof RagnoEntity && ((RagnoEntity) player.getVehicle()).isCrazy() && event.getOverlay().id().equals(VanillaGuiOverlay.HELMET.id())) {
+            Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("entity.illageandspillage.no_escape"), false);
+        }
     }
 }

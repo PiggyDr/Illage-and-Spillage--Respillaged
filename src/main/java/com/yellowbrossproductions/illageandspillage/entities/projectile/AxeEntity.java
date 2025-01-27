@@ -32,15 +32,6 @@ public class AxeEntity extends AbstractHurtingProjectile {
         super(p_36833_, p_36834_);
     }
 
-    public AxeEntity(EntityType<? extends AbstractHurtingProjectile> p_36817_, double p_36818_, double p_36819_, double p_36820_, double p_36821_, double p_36822_, double p_36823_, Level p_36824_) {
-        super(ModEntityTypes.Axe.get(), p_36818_, p_36819_, p_36820_, p_36821_, p_36822_, p_36823_, p_36824_);
-    }
-
-    public AxeEntity(EntityType<? extends AbstractHurtingProjectile> p_36826_, LivingEntity p_36827_, double p_36828_, double p_36829_, double p_36830_, Level p_36831_) {
-        super(ModEntityTypes.Axe.get(), p_36827_, p_36828_, p_36829_, p_36830_, p_36831_);
-        this.setOwner(p_36827_);
-    }
-
     public AxeEntity(Level p_181151_, LivingEntity p_181152_, double p_181153_, double p_181154_, double p_181155_) {
         super(ModEntityTypes.Axe.get(), p_181152_, p_181153_, p_181154_, p_181155_, p_181151_);
         this.setOwner(p_181152_);
@@ -68,6 +59,8 @@ public class AxeEntity extends AbstractHurtingProjectile {
         }
 
         super.tick();
+        this.setYRot(this.getYHeadRot());
+        this.setYHeadRot(this.getYRot());
     }
 
     @Override

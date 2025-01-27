@@ -268,11 +268,11 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
         }
 
         if (this.isAlive()) {
-            if (attackTicks == 6) {
+            if (this.attackTicks == 6) {
                 this.setAnimationState(2);
             }
 
-            if (attackTicks >= 6 && attackTicks % 2 == 0) {
+            if (this.attackTicks >= 6 && this.attackTicks % 2 == 0) {
                 this.fireArrow(this.getTarget(), 1.0F, 5.0F);
                 this.arrowsFired++;
             }
@@ -282,7 +282,7 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
             this.arrowsFired--;
         }
 
-        if (this.arrowsFired >= 75 && !this.isStunned && this.random.nextInt(5) == 0) {
+        if (this.arrowsFired >= 45 && !this.isStunned && this.random.nextInt(5) == 0) {
             this.makeOverheatParticles();
         }
 
@@ -337,6 +337,8 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
     }
 
     public void fireArrow(LivingEntity target, float p_82196_2_, float inaccuracy) {
+        if (target == null) return;
+
         AbstractArrow abstractarrowentity = this.getArrow(Items.BOW.getDefaultInstance(), p_82196_2_);
         if (this.getMainHandItem().getItem() instanceof BowItem) {
             abstractarrowentity = ((BowItem) this.getMainHandItem().getItem()).customArrow(abstractarrowentity);
@@ -428,7 +430,9 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
 
         @Override
         public void stop() {
-            ChagrinSentryEntity.this.setAnimationState(0);
+            if (!ChagrinSentryEntity.this.isStunned) {
+                ChagrinSentryEntity.this.setAnimationState(0);
+            }
             ChagrinSentryEntity.this.isShooting = false;
             ChagrinSentryEntity.this.attackTicks = 0;
         }
@@ -437,7 +441,7 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
     class StunGoal extends Goal {
         @Override
         public boolean canUse() {
-            return !ChagrinSentryEntity.this.isInMotion() && ChagrinSentryEntity.this.getStunTicks() < 1 && !ChagrinSentryEntity.this.isPlayingIntro && ChagrinSentryEntity.this.arrowsFired > 100;
+            return !ChagrinSentryEntity.this.isInMotion() && ChagrinSentryEntity.this.getStunTicks() < 1 && !ChagrinSentryEntity.this.isPlayingIntro && ChagrinSentryEntity.this.arrowsFired > 60;
         }
 
         @Override

@@ -39,6 +39,10 @@ public class SkullBombEntity extends PathfinderMob implements IllagerAttack {
         return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.0).add(Attributes.MAX_HEALTH, 2.0).add(Attributes.ATTACK_DAMAGE, 0.0).add(Attributes.FOLLOW_RANGE, 32.0);
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean canBeAffected(MobEffectInstance p_21197_) {
         return false;
     }

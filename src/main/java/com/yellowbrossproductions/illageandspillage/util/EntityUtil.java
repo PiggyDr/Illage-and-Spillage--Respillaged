@@ -1,15 +1,12 @@
 package com.yellowbrossproductions.illageandspillage.util;
 
+import com.yellowbrossproductions.illageandspillage.capability.PreservedProvider;
 import com.yellowbrossproductions.illageandspillage.capability.WebbedProvider;
-import com.yellowbrossproductions.illageandspillage.entities.IllagerAttack;
-import com.yellowbrossproductions.illageandspillage.entities.ImpEntity;
-import com.yellowbrossproductions.illageandspillage.entities.TrickOrTreatEntity;
+import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.AxeEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.BoneEntity;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
-import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
-import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
-import com.yellowbrossproductions.illageandspillage.packet.WebbedSyncPacket;
+import com.yellowbrossproductions.illageandspillage.packet.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -17,6 +14,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,14 +34,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EntityUtil {
-    public EntityUtil() {
-    }
-
     public static boolean canHurtThisMob(Entity target, Mob attacker) {
-        if ((attacker.getTeam() != null || target.getTeam() != null) && (!(target instanceof IllagerAttack) || (target instanceof TrickOrTreatEntity && ((TrickOrTreatEntity) target).isOld())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
+        if ((attacker.getTeam() != null || target.getTeam() != null) && (!(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || ((target instanceof EngineerMachine || target instanceof BeeperEntity || target instanceof PokerEntity || target instanceof SniperEntity) && attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
             return attacker.getTeam() != target.getTeam();
-        } else if (((!(target instanceof Raider) && !(target instanceof IllagerAttack)) || (target instanceof TrickOrTreatEntity && ((TrickOrTreatEntity) target).isOld())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
-            return true;
+        } else if ((!(target instanceof Raider) || (attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && (!(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || ((target instanceof EngineerMachine || target instanceof BeeperEntity || target instanceof PokerEntity || target instanceof SniperEntity) && attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
+            return attacker != target;
         } else {
             return attacker.getTarget() == target;
         }
@@ -129,7 +124,12 @@ public class EntityUtil {
             livingEntity.stopUsingItem();
             livingEntity.level().broadcastEntityEvent(livingEntity, (byte) 30);
         }
+    }
 
+    public static void mobFollowingSound(Level level, Entity entity, SoundEvent sound, float volume, float pitch, boolean loop) {
+        if (!level.isClientSide) {
+            PacketHandler.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new MobFollowingSoundPacket(entity.getId(), sound, volume, pitch, loop));
+        }
     }
 
     public static void makeCircleParticles(Level level, LivingEntity spawner, ParticleOptions particleType, int amount, double y, float velocity) {
@@ -194,6 +194,19 @@ public class EntityUtil {
         entity.getCapability(WebbedProvider.WEBBED_CAPABILITY).ifPresent(webbed -> {
             webbed.setWebbed(isWebbed);
             PacketHandler.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new WebbedSyncPacket(entity.getId(), isWebbed));
+        });
+    }
+
+    public static boolean isPreserved(LivingEntity entity) {
+        AtomicBoolean isPreserved = new AtomicBoolean(false);
+        entity.getCapability(PreservedProvider.PRESERVED_CAPABILITY).ifPresent(preserved -> isPreserved.set(preserved.isPreserved()));
+        return isPreserved.get();
+    }
+
+    public static void setPreserved(LivingEntity entity, boolean isPreserved) {
+        entity.getCapability(PreservedProvider.PRESERVED_CAPABILITY).ifPresent(preserved -> {
+            preserved.setPreserved(isPreserved);
+            PacketHandler.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new PreservedSyncPacket(entity.getId(), isPreserved));
         });
     }
 }

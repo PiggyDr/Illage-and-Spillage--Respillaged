@@ -70,17 +70,41 @@ public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> imple
 
         PartDefinition right_arm = body.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 46).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(-5.0F, -9.0F, 0.0F));
 
-        right_arm.addOrReplaceChild("scythe", CubeListBuilder.create().texOffs(128, 41).addBox(0.0F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(-0.1F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(-0.2F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(-0.3F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(-0.4F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(-0.5F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(0.1F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(0.2F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(0.3F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(0.4F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F))
-                .texOffs(128, 41).addBox(0.5F, -12.0F, -12.0F, 0.0F, 24.0F, 24.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.0F, 9.0F, -2.0F, 2.3562F, 0.0F, 0.0F));
+        right_arm.addOrReplaceChild("scythe", CubeListBuilder.create().texOffs(128, 76).addBox(-4.0F, -0.5F, -1.0F, 6.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(138, 84).addBox(7.0F, -0.5F, -12.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(138, 86).addBox(6.0F, -0.5F, -11.0F, 3.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 79).addBox(4.0F, -0.5F, -9.0F, 3.0F, 1.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(148, 86).addBox(2.0F, -0.5F, -5.0F, 3.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(144, 76).addBox(0.0F, -0.5F, -3.0F, 4.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(142, 79).addBox(-4.0F, -0.5F, 1.0F, 4.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 65).addBox(-6.0F, -0.5F, 3.0F, 3.0F, 1.0F, 6.0F, new CubeDeformation(0.0F))
+                .texOffs(142, 82).addBox(-8.0F, -0.5F, 4.0F, 2.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(148, 70).addBox(-10.0F, -0.5F, 3.0F, 2.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 88).addBox(-11.0F, -0.5F, 4.0F, 1.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 72).addBox(-4.0F, -0.5F, 9.0F, 7.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(152, 82).addBox(3.0F, -0.5F, 9.0F, 3.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 63).addBox(-3.0F, -0.5F, 8.0F, 12.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(148, 74).addBox(6.0F, -0.5F, 7.0F, 4.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(154, 63).addBox(8.0F, -0.5F, 6.0F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 84).addBox(-9.0F, -0.5F, 9.0F, 2.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(146, 65).addBox(-7.0F, -0.5F, 7.0F, 1.0F, 1.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 89).addBox(-6.0F, -0.5F, 9.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 89).addBox(0.0F, -0.5F, 1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 89).addBox(2.0F, -0.5F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 89).addBox(5.0F, -0.5F, -5.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 65).addBox(-3.0F, -0.5F, 7.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 67).addBox(10.0F, -0.5F, 5.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(138, 84).addBox(-8.0F, -0.5F, 8.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(138, 84).addBox(1.0F, -0.5F, -4.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(152, 89).addBox(5.0F, -0.5F, -10.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(138, 84).addBox(3.0F, -0.5F, -6.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 91).addBox(-3.0F, -0.5F, 3.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(156, 91).addBox(-5.0F, -0.5F, 2.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(136, 89).addBox(-6.0F, -0.5F, 0.0F, 1.0F, 1.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 92).addBox(-3.0F, -0.5F, -2.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(132, 92).addBox(-4.0F, -0.5F, -3.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+                .texOffs(144, 90).addBox(7.0F, -0.5F, -9.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(128, 68).addBox(6.0F, -0.5F, 9.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.0F, 7.6F, -4.0F, -3.1416F, -0.7418F, 1.5708F));
 
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -11.0F, 0.0F));
 
@@ -131,6 +155,7 @@ public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> imple
             this.animate(freakager.getAnimationState("scythe"), FreakagerAnimation.SCYTHE, ageInTicks, freakager.getAnimationSpeed());
             this.animate(freakager.getAnimationState("catch"), FreakagerAnimation.CATCH, ageInTicks, freakager.getAnimationSpeed());
             this.animate(freakager.getAnimationState("trickortreat"), FreakagerAnimation.TRICKORTREAT, ageInTicks, freakager.getAnimationSpeed());
+            this.animate(freakager.getAnimationState("anticheese"), FreakagerAnimation.ANTICHEESE, ageInTicks, freakager.getAnimationSpeed());
             this.animate(freakager.getAnimationState("phase"), FreakagerAnimation.PHASE, ageInTicks, freakager.getAnimationSpeed());
 
             head.yRot += netHeadYaw * ((float) Math.PI / 180F);

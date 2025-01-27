@@ -5,10 +5,10 @@ import com.yellowbrossproductions.illageandspillage.entities.goal.StareAtDeadFre
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.particle.ParticleRegisterer;
-import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -17,13 +17,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -44,15 +41,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAttack {
+public class EyesoreEntity extends Monster implements ICanBeAnimated, IllagerAttack {
     private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(EyesoreEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(EyesoreEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SCARED = SynchedEntityData.defineId(EyesoreEntity.class, EntityDataSerializers.BOOLEAN);
     public AnimationState slitherAnimationState = new AnimationState();
     public AnimationState flyAnimationState = new AnimationState();
     private LivingEntity owner = null;
     private BlockPos targetPos;
 
-    public EyesoreEntity(EntityType<? extends Raider> p_33002_, Level p_33003_) {
+    public EyesoreEntity(EntityType<? extends Monster> p_33002_, Level p_33003_) {
         super(p_33002_, p_33003_);
         this.xpReward = 0;
     }
@@ -62,7 +60,8 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         super.registerGoals();
         this.goalSelector.addGoal(0, new StareAtDeadFreakGoal(this));
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new SlitherGoal(this, 0.5f));
+        this.goalSelector.addGoal(0, new AvoidRagnoGoal(this, 16.0F, 0.65F, 0.6F));
+        this.goalSelector.addGoal(1, new SlitherGoal(this, 0.5F));
         this.targetSelector.addGoal(1, (new HurtByTargetGoal(this, Raider.class)).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
@@ -79,26 +78,6 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
 
     public LivingEntity getOwner() {
         return owner;
-    }
-
-    @Override
-    public boolean canBeAffected(MobEffectInstance p_21197_) {
-        return p_21197_.getEffect() != EffectRegisterer.MUTATION.get() && super.canBeAffected(p_21197_);
-    }
-
-    @Override
-    public boolean canJoinRaid() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeLeader() {
-        return false;
-    }
-
-    @Override
-    public SoundEvent getCelebrateSound() {
-        return IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_EYESORE_AMBIENT.get();
     }
 
     @Nullable
@@ -135,6 +114,7 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         super.defineSynchedData();
         this.entityData.define(ANIMATION_STATE, 0);
         this.entityData.define(FLYING, false);
+        this.entityData.define(SCARED, false);
     }
 
     @Override
@@ -146,10 +126,6 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         }
 
         return super.causeFallDamage(p_225503_1_, p_225503_2_, p_147189_);
-    }
-
-    @Override
-    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
     }
 
     @Override
@@ -180,8 +156,8 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
     }
 
     private void stopAllAnimationStates() {
-        slitherAnimationState.stop();
-        flyAnimationState.stop();
+        this.slitherAnimationState.stop();
+        this.flyAnimationState.stop();
     }
 
     @Override
@@ -191,13 +167,38 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
 
     @Override
     public boolean hurt(DamageSource p_37849_, float p_37850_) {
-        boolean shouldHurt = (this.owner == null || p_37849_.getEntity() != this.owner) && super.hurt(p_37849_, p_37850_);
-
-        if (shouldHurt) {
+        boolean superHurt = super.hurt(p_37849_, p_37850_);
+        if (superHurt) {
             this.makeBloodParticles();
         }
+        return superHurt;
+    }
 
-        return shouldHurt;
+    public void makeCryParticles() {
+        if (!this.level().isClientSide) {
+            Iterator<ServerPlayer> var1 = ((ServerLevel) this.level()).players().iterator();
+
+            while (true) {
+                ServerPlayer serverPlayer;
+                do {
+                    if (!var1.hasNext()) {
+                        return;
+                    }
+
+                    serverPlayer = var1.next();
+                } while (!(serverPlayer.distanceToSqr(this) < 4096.0));
+
+                ParticlePacket packet = new ParticlePacket();
+
+                double d0 = -0.5 + this.random.nextGaussian();
+                double d1 = -0.5 + this.random.nextGaussian();
+                double d2 = -0.5 + this.random.nextGaussian();
+                packet.queueParticle(ParticleTypes.SPLASH, false, new Vec3(this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5)), new Vec3(d0, d1, d2));
+
+                ServerPlayer finalServerPlayer = serverPlayer;
+                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> finalServerPlayer), packet);
+            }
+        }
     }
 
     public void makeBloodParticles() {
@@ -251,6 +252,10 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         if (this.onGround()) {
             this.setFlying(false);
         }
+
+        if (this.isScared()) {
+            this.makeCryParticles();
+        }
     }
 
     public boolean isFlying() {
@@ -262,14 +267,19 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         this.setAnimationState(flying ? 2 : 1);
     }
 
+    public boolean isScared() {
+        return this.entityData.get(SCARED);
+    }
+
+    public void setScared(boolean scared) {
+        this.entityData.set(SCARED, scared);
+    }
+
     protected void dealDamage(LivingEntity entity) {
         if (this.isAlive()) {
             if (this.hasLineOfSight(entity) && entity.hurt(this.damageSources().mobAttack(this), (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
-                double d2;
-                d2 = entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-
-                double d0 = d2;
-                double d1 = Math.max(0.0D, 1.0D - d0);
+                double d2 = entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+                double d1 = Math.max(0.0D, 1.0D - d2);
                 entity.setDeltaMovement(entity.getDeltaMovement().add(0.0D, (double) 0.4F * d1, 0.0D));
                 this.playSound(SoundEvents.SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
                 this.doEnchantDamageEffects(this, entity);
@@ -278,9 +288,14 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
 
     }
 
-    @Override
-    public void knockback(double p_147241_, double p_147242_, double p_147243_) {
-        super.knockback(p_147241_ * 1.5, p_147242_ * 2, p_147243_ * 1.5);
+    public boolean shouldAvoidRagno() {
+        List<RagnoEntity> ragnos = this.level().getEntitiesOfClass(RagnoEntity.class, this.getBoundingBox().inflate(11.0));
+        for (RagnoEntity ragno : ragnos) {
+            if (ragno.isCrazy()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     class SlitherGoal extends Goal {
@@ -297,6 +312,8 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         }
 
         public boolean canUse() {
+            if (this.eyesore.shouldAvoidRagno()) return false;
+
             BlockPos targetPos = EyesoreEntity.this.targetPos;
 
             Vec3 vec3;
@@ -327,7 +344,25 @@ public class EyesoreEntity extends Raider implements ICanBeAnimated, IllagerAtta
         }
 
         public boolean canContinueToUse() {
-            return !this.eyesore.getNavigation().isDone();
+            return !this.eyesore.getNavigation().isDone() && !this.eyesore.shouldAvoidRagno();
+        }
+    }
+
+    class AvoidRagnoGoal extends AvoidEntityGoal {
+        public AvoidRagnoGoal(PathfinderMob p_25033_, float p_25035_, double p_25036_, double p_25037_) {
+            super(p_25033_, RagnoEntity.class, p_25035_, p_25036_, p_25037_, (predicate) -> ((RagnoEntity) predicate).isCrazy());
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            setScared(true);
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            setScared(false);
         }
     }
 }

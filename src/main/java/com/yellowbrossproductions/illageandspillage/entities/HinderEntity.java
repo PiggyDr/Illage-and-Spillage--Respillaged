@@ -3,6 +3,7 @@ package com.yellowbrossproductions.illageandspillage.entities;
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
+import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,6 +37,7 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
     public AnimationState idleAnimationState = new AnimationState();
     private int introTicks;
     private LivingEntity owner;
+    int healingTime;
 
     public HinderEntity(EntityType<? extends Raider> p_33002_, Level p_33003_) {
         super(p_33002_, p_33003_);
@@ -227,16 +229,21 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
 
                 if (list.isEmpty()) {
                     this.setHealing(false);
+                    this.healingTime = 0;
                 } else {
+                    this.setHealing(true);
                     for (Raider entity : list) {
                         this.makeParticleTrail(this.getX(), this.getY() + 0.6, this.getZ(), entity.getBoundingBox().getCenter().x, entity.getBoundingBox().getCenter().y, entity.getBoundingBox().getCenter().z);
-                        this.setHealing(true);
-                        if (tickCount % 5 == 0) {
-                            this.playSound(IllageAndSpillageSoundEvents.ENTITY_ENGINEER_HINDER_HEAL.get(), 0.5f, 2.0f);
+                        if (this.tickCount % 2 == 0) {
                             entity.heal(1);
                             if (entity.hasActiveRaid()) entity.getCurrentRaid().updateBossbar();
                         }
                     }
+
+                    if (this.healingTime == 0) {
+                        EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_ENGINEER_HINDER_HEAL.get(), 0.5F, 2.0F, true);
+                    }
+                    this.healingTime++;
                 }
             }
 

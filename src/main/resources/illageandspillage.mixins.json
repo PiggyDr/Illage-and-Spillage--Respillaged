@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.yellowbrossproductions.illageandspillage.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "refmap": "illageandspillage.mixins.refmap.json",
+  "mixins": [
+    "HurtByTargetGoalMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

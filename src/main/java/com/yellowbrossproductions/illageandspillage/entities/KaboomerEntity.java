@@ -49,6 +49,10 @@ public class KaboomerEntity extends Monster implements IllagerAttack {
         this.setMaxUpStep(1.0F);
     }
 
+    public boolean isAttackable() {
+        return false;
+    }
+
     public boolean canBeAffected(MobEffectInstance p_21197_) {
         return false;
     }

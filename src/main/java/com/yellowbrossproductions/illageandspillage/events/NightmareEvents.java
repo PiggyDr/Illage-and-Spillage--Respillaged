@@ -2,12 +2,19 @@ package com.yellowbrossproductions.illageandspillage.events;
 
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.*;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid = "illageandspillage", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class NightmareEvents {
@@ -32,6 +39,77 @@ public class NightmareEvents {
         }
         if (IllageAndSpillageConfig.nightmare_mode.get() && attacker instanceof KaboomerEntity && victim.getUseItem().getItem() instanceof ShieldItem) {
             victim.getUseItem().shrink(victim.getUseItem().getCount());
+        }
+    }
+
+    @SubscribeEvent
+    public static void replaceMobs(LivingEvent.LivingTickEvent event) {
+        Level level = event.getEntity().level();
+        Entity entity = event.getEntity();
+
+        if (!IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get() || level.isClientSide() || !(level instanceof ServerLevel) || (level.dimension() == Level.NETHER && event.getEntity() instanceof EnderMan) || entity instanceof Blaze || entity instanceof EnderDragon || ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()) == null || ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()).getNamespace().equals("illageandspillage")) {
+            return;
+        }
+
+        if (entity instanceof Mob && (((Mob) entity).getMobType() == MobType.WATER || ((Mob) entity).getRandom().nextDouble() <= 0.1)) {
+            entity.discard();
+            return;
+        }
+
+        if (entity instanceof Mob mob) {
+            Mob newEntity;
+
+            if (mob.getRandom().nextDouble() < 0.05) {
+                int randomSelection = mob.getRandom().nextInt(0, 4);
+                if (randomSelection == 0) {
+                    newEntity = ModEntityTypes.Magispeller.get().create(level);
+                    assert newEntity != null;
+                    ((MagispellerEntity) newEntity).setActive(true);
+                } else if (randomSelection == 1) {
+                    newEntity = ModEntityTypes.Spiritcaller.get().create(level);
+                    assert newEntity != null;
+                    ((SpiritcallerEntity) newEntity).setActive(true);
+                } else if (randomSelection == 2) {
+                    newEntity = ModEntityTypes.Freakager.get().create(level);
+                    assert newEntity != null;
+                    ((FreakagerEntity) newEntity).setActive(true);
+
+                    RagnoEntity ragno = ModEntityTypes.Ragno.get().create(level);
+                    assert ragno != null;
+                    ragno.moveTo(mob.getX(), mob.getY(), mob.getZ(), mob.getYRot(), mob.getXRot());
+                    ragno.setOwner(newEntity);
+                    ragno.setShakeMultiplier(10);
+                    ragno.finalizeSpawn((ServerLevel) level, level.getCurrentDifficultyAt(ragno.blockPosition()), MobSpawnType.NATURAL, null, null);
+                    level.addFreshEntity(ragno);
+
+                    newEntity.startRiding(ragno);
+                } else {
+                    newEntity = ModEntityTypes.Ragno.get().create(level);
+                }
+            } else {
+                int randomSelection = mob.getRandom().nextInt(0, 6);
+                if (randomSelection == 0) {
+                    newEntity = ModEntityTypes.Igniter.get().create(level);
+                } else if (randomSelection == 1) {
+                    newEntity = ModEntityTypes.Engineer.get().create(level);
+                } else if (randomSelection == 2) {
+                    newEntity = ModEntityTypes.Twittollager.get().create(level);
+                } else if (randomSelection == 3) {
+                    newEntity = ModEntityTypes.Preserver.get().create(level);
+                } else if (randomSelection == 4) {
+                    newEntity = ModEntityTypes.Absorber.get().create(level);
+                } else {
+                    newEntity = ModEntityTypes.Crocofang.get().create(level);
+                }
+            }
+
+            if (newEntity != null) {
+                newEntity.moveTo(mob.getX(), mob.getY(), mob.getZ(), mob.getYRot(), mob.getXRot());
+                newEntity.finalizeSpawn((ServerLevel) level, level.getCurrentDifficultyAt(newEntity.blockPosition()), MobSpawnType.NATURAL, null, null);
+                level.addFreshEntity(newEntity);
+            }
+
+            mob.discard();
         }
     }
 

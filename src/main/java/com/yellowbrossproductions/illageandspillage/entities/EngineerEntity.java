@@ -1,6 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
+import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -150,15 +151,18 @@ public class EngineerEntity extends AbstractIllager implements ICanBeAnimated {
     public void tick() {
         super.tick();
 
-        if (this.attackType < 1) {
+        if (this.attackType < 1 && (IllageAndSpillageConfig.engineer_machine_limit.get() < 0 || this.getMachines().size() < IllageAndSpillageConfig.engineer_machine_limit.get())) {
             --this.throwCooldown;
+        }
+
+        if (this.attackType < 1) {
             --this.repairCooldown;
         } else {
             this.attackTicks++;
         }
 
-        if (repairTicks > 0) {
-            repairTicks++;
+        if (this.repairTicks > 0) {
+            this.repairTicks++;
         }
 
         if (this.isAlive()) {
@@ -231,7 +235,7 @@ public class EngineerEntity extends AbstractIllager implements ICanBeAnimated {
     class ThrowMachineGoal extends Goal {
         @Override
         public boolean canUse() {
-            return EngineerEntity.this.attackType == 0 && EngineerEntity.this.getTarget() != null && EngineerEntity.this.throwCooldown < 1 && EngineerEntity.this.getMachines().size() < 3;
+            return EngineerEntity.this.attackType == 0 && EngineerEntity.this.getTarget() != null && EngineerEntity.this.throwCooldown < 1 && (IllageAndSpillageConfig.engineer_machine_limit.get() < 0 || EngineerEntity.this.getMachines().size() < IllageAndSpillageConfig.engineer_machine_limit.get());
         }
 
         @Override

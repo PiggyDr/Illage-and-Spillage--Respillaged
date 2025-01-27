@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.Objects;
 
-public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAttack {
+public class FunnyboneEntity extends Monster implements ICanBeAnimated, IllagerAttack {
     private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(FunnyboneEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(FunnyboneEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> GOOPY = SynchedEntityData.defineId(FunnyboneEntity.class, EntityDataSerializers.BOOLEAN);
@@ -52,7 +52,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
     private boolean circleDirection = true;
     protected int circleTick = 0;
 
-    public FunnyboneEntity(EntityType<? extends Raider> p_33002_, Level p_33003_) {
+    public FunnyboneEntity(EntityType<? extends Monster> p_33002_, Level p_33003_) {
         super(p_33002_, p_33003_);
         this.xpReward = 0;
     }
@@ -62,7 +62,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
         super.registerGoals();
         this.goalSelector.addGoal(0, new StareAtDeadFreakGoal(this));
         this.goalSelector.addGoal(1, new FunnyboneAttackGoal(this, 8.0F));
-        this.goalSelector.addGoal(8, new FunnyboneRandomStrollGoal(this, 0.4));
+        this.goalSelector.addGoal(8, new FunnyboneRandomStrollGoal(this, 0.3));
         this.goalSelector.addGoal(9, new FunnyboneLookAtEntityGoal(this, Player.class, 15.0F, 1.0F));
         this.goalSelector.addGoal(10, new FunnyboneLookAtEntityGoal(this, Mob.class, 15.0F));
         this.targetSelector.addGoal(1, (new HurtByTargetGoal(this, Raider.class)).setAlertOthers());
@@ -72,7 +72,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.9).add(Attributes.MAX_HEALTH, 12.0).add(Attributes.FOLLOW_RANGE, 16.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.9).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.FOLLOW_RANGE, 16.0);
     }
 
     public void setOwner(LivingEntity owner) {
@@ -84,37 +84,18 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
     }
 
     @Override
-    public boolean canJoinRaid() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeLeader() {
-        return false;
-    }
-
-    @Override
     public MobType getMobType() {
         return MobType.UNDEAD;
     }
 
     @Override
     public boolean canBeAffected(MobEffectInstance p_21197_) {
-        return p_21197_.getEffect() != EffectRegisterer.MUTATION.get() && super.canBeAffected(p_21197_);
+        return (!this.isGoopy() || p_21197_.getEffect() != EffectRegisterer.MUTATION.get()) && super.canBeAffected(p_21197_);
     }
 
     @Override
     public float getVoicePitch() {
         return (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.5F;
-    }
-
-    @Override
-    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
-    }
-
-    @Override
-    public SoundEvent getCelebrateSound() {
-        return IllageAndSpillageSoundEvents.ENTITY_FREAKAGER_FUNNYBONE_AMBIENT.get();
     }
 
     @Nullable
@@ -229,9 +210,9 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
     }
 
     private void stopAllAnimationStates() {
-        flyAnimationState.stop();
-        spawnAnimationState.stop();
-        throwAnimationState.stop();
+        this.flyAnimationState.stop();
+        this.spawnAnimationState.stop();
+        this.throwAnimationState.stop();
     }
 
     @Override
@@ -258,23 +239,18 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
     }
 
     @Override
-    public boolean hurt(DamageSource p_37849_, float p_37850_) {
-        return (this.owner == null || p_37849_.getEntity() != this.owner) && super.hurt(p_37849_, p_37850_);
-    }
-
-    @Override
     public void tick() {
-        if (introTicks == 1) {
+        if (this.introTicks == 1) {
             this.playSound(SoundEvents.SKELETON_STEP);
             this.playAmbientSound();
             this.setAnimationState(2);
         }
 
-        if (introTicks > 0) {
-            introTicks++;
+        if (this.introTicks > 0) {
+            this.introTicks++;
         }
 
-        if (introTicks == 22) {
+        if (this.introTicks == 22) {
             this.setAnimationState(0);
         }
 
@@ -287,7 +263,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
         }
 
         if (this.onGround() && isFlying()) {
-            if (introTicks < 1) introTicks = 1;
+            if (this.introTicks < 1) this.introTicks = 1;
             this.setFlying(false);
         }
 
@@ -317,7 +293,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
                     projectile.readAdditionalSaveData(tag);
 
                     projectile.isGoopy = this.isGoopy();
-                    projectile.setShooter(this);
+                    projectile.setOwner(this);
                     this.level().addFreshEntity(projectile);
                 }
             }
@@ -333,21 +309,21 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
     }
 
     private boolean canMove() {
-        return !this.isFlying() && (introTicks == 0 || introTicks > 22);
+        return !this.isFlying() && (this.introTicks == 0 || this.introTicks > 22);
     }
 
     protected Vec3 updateCirclingPosition(float radius, float speed) {
         LivingEntity target = getTarget();
         if (target != null) {
-            if (random.nextInt(200) == 0) {
-                circleDirection = !circleDirection;
+            if (this.random.nextInt(200) == 0) {
+                this.circleDirection = !this.circleDirection;
             }
-            if (circleDirection) {
-                circleTick++;
+            if (this.circleDirection) {
+                this.circleTick++;
             } else {
-                circleTick--;
+                this.circleTick--;
             }
-            return circleEntityPosition(target, radius, speed, true, circleTick, 0);
+            return this.circleEntityPosition(target, radius, speed, true, this.circleTick, 0);
         }
         return null;
     }
@@ -421,7 +397,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
         public void start() {
             super.start();
             this.mob.setAggressive(true);
-            timeSinceAttack = mob.random.nextInt(80);
+            this.timeSinceAttack = this.mob.random.nextInt(80);
         }
 
         public void stop() {
@@ -429,7 +405,7 @@ public class FunnyboneEntity extends Raider implements ICanBeAnimated, IllagerAt
             this.mob.setAggressive(false);
 
             this.mob.getMoveControl().strafe(0, 0);
-            attacking = false;
+            this.attacking = false;
         }
 
         public boolean requiresUpdateEveryTick() {
