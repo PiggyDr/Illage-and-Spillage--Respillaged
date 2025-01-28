@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "illageandspillage.mixins.refmap.json",
   "mixins": [
-    "HurtByTargetGoalMixin"
+    "HurtByTargetGoalMixin",
+    "RaidMixin"
   ],
   "client": [
   ],

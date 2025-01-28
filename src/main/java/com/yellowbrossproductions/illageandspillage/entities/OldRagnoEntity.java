@@ -110,29 +110,26 @@ public class OldRagnoEntity extends Raider implements IllagerBoss, ICanBeAnimate
     public OldRagnoEntity(EntityType<? extends Raider> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 40;
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) {
-            bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-            bossEvent.setVisible(false);
-        }
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent.setVisible(false);
     }
 
     @Override
     public void startSeenByPlayer(ServerPlayer p_20119_) {
         super.startSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) this.bossEvent.addPlayer(p_20119_);
+        this.bossEvent.addPlayer(p_20119_);
     }
 
     @Override
     public void stopSeenByPlayer(ServerPlayer p_20119_) {
         super.stopSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) this.bossEvent.removePlayer(p_20119_);
+        this.bossEvent.removePlayer(p_20119_);
     }
 
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (IllageAndSpillageConfig.freaky_boss_bar.get())
-            this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
     }
 
     protected void registerGoals() {
@@ -228,7 +225,7 @@ public class OldRagnoEntity extends Raider implements IllagerBoss, ICanBeAnimate
 
     public void readAdditionalSaveData(CompoundTag p_37862_) {
         super.readAdditionalSaveData(p_37862_);
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) this.bossEvent.setName(this.getDisplayName());
+        this.bossEvent.setName(this.getDisplayName());
     }
 
     public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider) {
@@ -236,6 +233,10 @@ public class OldRagnoEntity extends Raider implements IllagerBoss, ICanBeAnimate
     }
 
     public void applyRaidBuffs(int p_213660_1_, boolean p_213660_2_) {
+    }
+
+    public boolean canJoinRaid() {
+        return (this.isCrazy() || this.phaseTicks > 0) && super.canJoinRaid();
     }
 
     public SoundEvent getTransMusic() {
@@ -285,7 +286,7 @@ public class OldRagnoEntity extends Raider implements IllagerBoss, ICanBeAnimate
             }
         }
 
-        if (IllageAndSpillageConfig.freaky_boss_bar.get() && this.isCrazy() && !bossEvent.isVisible()) {
+        if (EntityUtil.displayBossBar(this) && this.isCrazy() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
         }
 

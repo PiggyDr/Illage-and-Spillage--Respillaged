@@ -56,12 +56,11 @@ public class IllageAndSpillageConfig {
     public static ForgeConfigSpec.BooleanValue magispeller_distractEnemies;
     public static ForgeConfigSpec.BooleanValue mobs_watch_intros;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> banishable_mobs;
+    public static ForgeConfigSpec.ConfigValue<Integer> bossbar_type;
+    public static ForgeConfigSpec.BooleanValue bosses_darken_sky;
 
     public static ForgeConfigSpec.BooleanValue nightmare_mode;
     public static ForgeConfigSpec.BooleanValue ULTIMATE_NIGHTMARE;
-    public static ForgeConfigSpec.BooleanValue spiri_boss_bar;
-    public static ForgeConfigSpec.BooleanValue freaky_boss_bar;
-    public static ForgeConfigSpec.BooleanValue magi_boss_bar;
     public static ForgeConfigSpec.ConfigValue<Double> spiri_damage_multiplier;
     public static ForgeConfigSpec.ConfigValue<Double> freaky_damage_multiplier;
     public static ForgeConfigSpec.ConfigValue<Double> ragno_damage_multiplier;
@@ -229,6 +228,8 @@ public class IllageAndSpillageConfig {
 
         common.push("Misc settings");
         boss_music = common.comment("Whether or not to play boss music", "Default = true").define("boss_music", true);
+        bossbar_type = common.comment("Determines how to display bossbars for bosses:", "0 = Never show", "1 = Only show outside of raids", "2 = Always show", "3 = Change raid bossbar to boss name and health (NOTE: May cause issues with other mods that change the raid bossbar)", "Requires game restart", "Default = 3").worldRestart().define("bossbar_type", 3);
+        bosses_darken_sky = common.comment("Whether or not the sky should darken when a boss' bossbar is displayed", "Requires game restart", "Default = true").worldRestart().define("bosses_darken_sky", true);
         mobs_watch_intros = common.comment("Determines if mobs will run away and then watch a boss while it performs its intro animation. Mainly for Mob Battles.", "Default = true").define("mobs_watchIntros", true);
         common.pop();
 
@@ -236,18 +237,15 @@ public class IllageAndSpillageConfig {
         nightmare_mode = common.comment("Nightmare Mode increases damage, resistance, and revamps attacks of all bosses to make them significantly harder", "See the \"Harder Illage and Spillage\" mod on Curseforge for more info about the changes", "Requires game restart", "THIS IS VERY UNFINISHED! ONLY THE CONFIG OPTIONS BELOW HAVE BEEN IMPLEMENTED!", "Default = false").worldRestart().define("nightmare_mode", false);
 
         common.push("Spiritcaller settings");
-        spiri_boss_bar = common.comment("Whether or not the Spiritcaller has a boss health bar", "Meant to be used with Nightmare Mode, but does not have to be", "Default: false").define("spiritcaller_boss_bar", false);
         spiri_damage_multiplier = common.comment("The Spiritcaller's damage will be multiplied by this number", "Only applies when Nightmare Mode is enabled", "Default: 2.5").define("spiritcaller_damage_multiplier", 2.5D);
         common.pop();
 
         common.push("Freakager & Ragno settings");
-        freaky_boss_bar = common.comment("Whether or not the Freakager and Ragno have boss health bars", "Meant to be used with Nightmare Mode, but does not have to be", "Default: false").define("freakager_and_ragno_boss_bar", false);
         freaky_damage_multiplier = common.comment("The Freakager's damage will be multiplied by this number", "Only applies when Nightmare Mode is enabled", "Default: 2.5").define("freakager_damage_multiplier", 2.5D);
         ragno_damage_multiplier = common.comment("Ragno's damage will be multiplied by this number", "Only applies when Nightmare Mode is enabled", "Default: 5.0").define("ragno_damage_multiplier", 5.0D);
         common.pop();
 
         common.push("Magispeller settings");
-        magi_boss_bar = common.comment("Whether or not the Magispeller has a boss health bar", "Meant to be used with Nightmare Mode, but does not have to be", "Default: false").define("magispeller_boss_bar", false);
         magi_damage_multiplier = common.comment("The Magispeller's damage will be multiplied by this number", "Only applies when Nightmare Mode is enabled", "Default: 2.5").define("magispeller_damage_multiplier", 2.5D);
         common.pop();
 

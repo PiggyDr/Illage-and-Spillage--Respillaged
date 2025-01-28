@@ -2,6 +2,7 @@ package com.yellowbrossproductions.illageandspillage.util;
 
 import com.yellowbrossproductions.illageandspillage.capability.PreservedProvider;
 import com.yellowbrossproductions.illageandspillage.capability.WebbedProvider;
+import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.AxeEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.BoneEntity;
@@ -34,6 +35,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EntityUtil {
+    public static boolean displayBossBar(Raider boss) {
+        if (IllageAndSpillageConfig.bossbar_type.get() == 1) {
+            return !boss.hasActiveRaid();
+        }
+
+        return IllageAndSpillageConfig.bossbar_type.get() == 2;
+    }
+
     public static boolean canHurtThisMob(Entity target, Mob attacker) {
         if ((attacker.getTeam() != null || target.getTeam() != null) && (!(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || ((target instanceof EngineerMachine || target instanceof BeeperEntity || target instanceof PokerEntity || target instanceof SniperEntity) && attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
             return attacker.getTeam() != target.getTeam();

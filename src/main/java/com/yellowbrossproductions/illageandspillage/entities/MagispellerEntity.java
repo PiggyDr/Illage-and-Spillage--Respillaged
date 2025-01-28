@@ -142,22 +142,20 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     public MagispellerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 100;
-        if (IllageAndSpillageConfig.magi_boss_bar.get()) {
-            bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-            bossEvent.setVisible(false);
-        }
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent.setVisible(false);
     }
 
     @Override
     public void startSeenByPlayer(ServerPlayer p_20119_) {
         super.startSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.magi_boss_bar.get()) this.bossEvent.addPlayer(p_20119_);
+        this.bossEvent.addPlayer(p_20119_);
     }
 
     @Override
     public void stopSeenByPlayer(ServerPlayer p_20119_) {
         super.stopSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.magi_boss_bar.get()) this.bossEvent.removePlayer(p_20119_);
+        this.bossEvent.removePlayer(p_20119_);
     }
 
     protected void registerGoals() {
@@ -194,14 +192,12 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     protected void customServerAiStep() {
         super.customServerAiStep();
 
-        if (IllageAndSpillageConfig.magi_boss_bar.get())
-            this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
 
         Entity entity = this.getTarget();
         if (this.isFaking() && this.random.nextInt(10) == 0 && entity != null && this.distanceToSqr(entity) > 1024.0) {
             this.teleportTowards(entity);
         }
-
     }
 
     public boolean causeFallDamage(float p_225503_1_, float p_225503_2_, DamageSource p_147189_) {
@@ -300,7 +296,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
     public void readAdditionalSaveData(CompoundTag p_70037_1_) {
         super.readAdditionalSaveData(p_70037_1_);
-        if (IllageAndSpillageConfig.magi_boss_bar.get()) this.bossEvent.setName(this.getDisplayName());
+        this.bossEvent.setName(this.getDisplayName());
         this.setActive(p_70037_1_.getBoolean("active"));
         this.setBalloon(p_70037_1_.getBoolean("IsBalloon"));
     }
@@ -374,7 +370,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
             this.stopAttackersFromAttacking();
         }
 
-        if (IllageAndSpillageConfig.magi_boss_bar.get() && this.isActive() && !bossEvent.isVisible()) {
+        if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
         }
 

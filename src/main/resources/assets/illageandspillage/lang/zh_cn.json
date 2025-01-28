@@ -55,6 +55,8 @@
     "entity.illageandspillage.no_escape": "You can't escape",
     "entity.illageandspillage.old_magispeller": "旧版魔法师",
 
+    "event.illageandspillage.raid.bosses_remaining": "Bosses Remaining: %s",
+
     "item.illageandspillage.totem_of_banishment": "放逐图腾",
     "item.illageandspillage.spellbound_book": "灵魂之书",
     "item.illageandspillage.bag_of_horrors": "可怖之袋",

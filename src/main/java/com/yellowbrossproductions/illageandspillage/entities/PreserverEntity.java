@@ -79,10 +79,10 @@ public class PreserverEntity extends AbstractIllager {
         if (this.isTryingToProtect()) {
             if (this.getThingToProtect() != null && this.getThingToProtect().isAlive() && this.getThingToProtect().distanceToSqr(this) < 6.0) {
                 this.getThingToProtect().addEffect(new MobEffectInstance(EffectRegisterer.PRESERVED.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false));
+                this.entityToParticle = this.getThingToProtect();
+                this.tickCountWhenProtected = this.getThingToProtect().tickCount;
             }
 
-            this.entityToParticle = this.getThingToProtect();
-            this.tickCountWhenProtected = this.getThingToProtect().tickCount;
             this.setTryingToProtect(false);
             this.playSound(IllageAndSpillageSoundEvents.ENTITY_PRESERVER_LAND.get(), 1.0F, 1.0F);
             if (!this.level().isClientSide) {

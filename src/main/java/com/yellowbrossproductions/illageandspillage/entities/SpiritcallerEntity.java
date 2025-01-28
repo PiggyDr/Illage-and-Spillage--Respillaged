@@ -121,29 +121,25 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
     public SpiritcallerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 50;
-        if (IllageAndSpillageConfig.spiri_boss_bar.get()) {
-            bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-            bossEvent.setVisible(false);
-        }
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
+        bossEvent.setVisible(false);
     }
 
     @Override
     public void startSeenByPlayer(ServerPlayer p_20119_) {
         super.startSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.spiri_boss_bar.get()) this.bossEvent.addPlayer(p_20119_);
+        this.bossEvent.addPlayer(p_20119_);
     }
 
     @Override
     public void stopSeenByPlayer(ServerPlayer p_20119_) {
         super.stopSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.spiri_boss_bar.get()) this.bossEvent.removePlayer(p_20119_);
+        this.bossEvent.removePlayer(p_20119_);
     }
 
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (IllageAndSpillageConfig.spiri_boss_bar.get())
-            this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
     }
 
     protected void registerGoals() {
@@ -209,7 +205,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
 
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (IllageAndSpillageConfig.spiri_boss_bar.get()) this.bossEvent.setName(this.getDisplayName());
+        this.bossEvent.setName(this.getDisplayName());
         this.setActive(tag.getBoolean("active"));
         this.setSoulPower(tag.getInt("SoulPower"));
         if (tag.contains("Health", 99)) {
@@ -371,6 +367,8 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
     }
 
     public void tick() {
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+
         this.updateMobList();
         List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !(predicate instanceof IllagerBoss));
         if (IllageAndSpillageConfig.spiritcaller_forcefield.get() && this.hasActiveRaid()) {
@@ -400,7 +398,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
             this.stopAttackersFromAttacking();
         }
 
-        if (IllageAndSpillageConfig.spiri_boss_bar.get() && this.isActive() && !bossEvent.isVisible()) {
+        if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
         }
 

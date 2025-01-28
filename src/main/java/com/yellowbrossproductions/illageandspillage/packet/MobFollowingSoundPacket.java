@@ -1,13 +1,12 @@
 package com.yellowbrossproductions.illageandspillage.packet;
 
-import com.yellowbrossproductions.illageandspillage.client.sound.MobFollowingSound;
-import net.minecraft.client.Minecraft;
+import com.yellowbrossproductions.illageandspillage.util.ClientHelper;
+import com.yellowbrossproductions.illageandspillage.util.MobFollowingSoundPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -43,15 +42,12 @@ public class MobFollowingSoundPacket {
 
     public static void handle(MobFollowingSoundPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            if (ctx.get().getDirection().getReceptionSide().isClient()) {
-                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                    if (Minecraft.getInstance().level != null) {
-                        Entity entity = Minecraft.getInstance().level.getEntity(msg.entityId);
-                        if (entity != null && msg.sound != null) {
-                            Minecraft.getInstance().getSoundManager().play(new MobFollowingSound(entity, msg.sound, msg.volume, msg.pitch, msg.loop));
-                        }
-                    }
-                });
+            final Level level = ClientHelper.getLevel();
+            if (level == null) return;
+
+            Entity entity = level.getEntity(msg.entityId);
+            if (entity != null && msg.sound != null) {
+                MobFollowingSoundPlayer.playMusic(entity, msg.sound, msg.volume, msg.pitch, msg.loop);
             }
         });
         ctx.get().setPacketHandled(true);

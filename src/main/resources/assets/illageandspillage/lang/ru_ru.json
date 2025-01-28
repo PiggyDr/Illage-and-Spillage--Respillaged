@@ -55,6 +55,8 @@
   "entity.illageandspillage.no_escape": "You can't escape",
   "entity.illageandspillage.old_magispeller": "Магоклинатель",
 
+  "event.illageandspillage.raid.bosses_remaining": "Bosses Remaining: %s",
+
   "item.illageandspillage.totem_of_banishment": "Тотем изгнания",
   "item.illageandspillage.spellbound_book": "Заколдованная книга",
   "item.illageandspillage.bag_of_horrors": "Мешок с ужасов",

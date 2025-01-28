@@ -55,6 +55,8 @@
   "entity.illageandspillage.no_escape": "You can't escape",
   "entity.illageandspillage.old_magispeller": "Magispeller",
 
+  "event.illageandspillage.raid.bosses_remaining": "Bosses Remaining: %s",
+
   "item.illageandspillage.totem_of_banishment": "Totem of Banishment",
   "item.illageandspillage.spellbound_book": "Spellbound Book",
   "item.illageandspillage.bag_of_horrors": "Bag of Horrors",

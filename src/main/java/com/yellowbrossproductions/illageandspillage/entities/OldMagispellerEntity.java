@@ -13,12 +13,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -55,6 +58,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss {
+    public ServerBossEvent bossEvent;
     private final List<FakeMagispellerEntity> clones = new ArrayList<>();
     private static final EntityDataAccessor<Boolean> FAKING;
     private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
@@ -87,6 +91,20 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
     public OldMagispellerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 100;
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent.setVisible(false);
+    }
+
+    @Override
+    public void startSeenByPlayer(ServerPlayer p_20119_) {
+        super.startSeenByPlayer(p_20119_);
+        this.bossEvent.addPlayer(p_20119_);
+    }
+
+    @Override
+    public void stopSeenByPlayer(ServerPlayer p_20119_) {
+        super.stopSeenByPlayer(p_20119_);
+        this.bossEvent.removePlayer(p_20119_);
     }
 
     protected void registerGoals() {
@@ -120,11 +138,13 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
 
     protected void customServerAiStep() {
         super.customServerAiStep();
+
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+
         Entity entity = this.getTarget();
         if (this.isFaking() && this.random.nextInt(10) == 0 && entity != null && this.distanceToSqr(entity) > 1024.0) {
             this.teleportTowards(entity);
         }
-
     }
 
     public boolean causeFallDamage(float p_225503_1_, float p_225503_2_, DamageSource p_147189_) {
@@ -163,6 +183,7 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
 
     public void readAdditionalSaveData(CompoundTag p_70037_1_) {
         super.readAdditionalSaveData(p_70037_1_);
+        this.bossEvent.setName(this.getDisplayName());
         this.setFaking(p_70037_1_.getBoolean("IsFaking"));
         this.setActive(p_70037_1_.getBoolean("active"));
     }
@@ -256,6 +277,10 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
 
         if (this.areIllagersNearby()) {
             this.stopAttackersFromAttacking();
+        }
+
+        if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
+            bossEvent.setVisible(true);
         }
 
         if (this.isFaking()) {

@@ -8,6 +8,7 @@ import com.yellowbrossproductions.illageandspillage.entities.projectile.*;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
+import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import com.yellowbrossproductions.illageandspillage.util.ItemRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.PotionRegisterer;
@@ -97,29 +98,26 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
     public OldFreakagerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 20;
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) {
-            bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-            bossEvent.setVisible(false);
-        }
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent.setVisible(false);
     }
 
     @Override
     public void startSeenByPlayer(ServerPlayer p_20119_) {
         super.startSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) this.bossEvent.addPlayer(p_20119_);
+        this.bossEvent.addPlayer(p_20119_);
     }
 
     @Override
     public void stopSeenByPlayer(ServerPlayer p_20119_) {
         super.stopSeenByPlayer(p_20119_);
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) this.bossEvent.removePlayer(p_20119_);
+        this.bossEvent.removePlayer(p_20119_);
     }
 
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (IllageAndSpillageConfig.freaky_boss_bar.get())
-            this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
     }
 
     protected void registerGoals() {
@@ -170,7 +168,7 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
 
     public void readAdditionalSaveData(CompoundTag p_37862_) {
         super.readAdditionalSaveData(p_37862_);
-        if (IllageAndSpillageConfig.freaky_boss_bar.get()) this.bossEvent.setName(this.getDisplayName());
+        this.bossEvent.setName(this.getDisplayName());
         this.setActive(p_37862_.getBoolean("active"));
     }
 
@@ -233,7 +231,7 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
             this.stopAttackersFromAttacking();
         }
 
-        if (IllageAndSpillageConfig.freaky_boss_bar.get() && this.isActive() && !bossEvent.isVisible()) {
+        if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
         }
 

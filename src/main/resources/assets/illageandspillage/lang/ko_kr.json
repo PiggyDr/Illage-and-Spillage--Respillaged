@@ -55,6 +55,8 @@
   "entity.illageandspillage.no_escape": "You can't escape",
   "entity.illageandspillage.old_magispeller": "혼돈술사",
 
+  "event.illageandspillage.raid.bosses_remaining": "Bosses Remaining: %s",
+
   "item.illageandspillage.totem_of_banishment": "벡스 퇴치의 토템",
   "item.illageandspillage.spellbound_book": "주문책",
   "item.illageandspillage.bag_of_horrors": "수상한 가방",
