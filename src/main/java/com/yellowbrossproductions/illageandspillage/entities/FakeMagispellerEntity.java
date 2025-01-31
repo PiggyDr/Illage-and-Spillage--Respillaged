@@ -37,7 +37,7 @@ import net.minecraftforge.event.entity.EntityTeleportEvent;
 
 import javax.annotation.Nullable;
 
-public class FakeMagispellerEntity extends AbstractIllager implements IllagerBoss {
+public class FakeMagispellerEntity extends AbstractIllager {
     private Mob owner;
     private int waitTimeFaker;
 

@@ -1,10 +1,11 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
+import com.yellowbrossproductions.illageandspillage.client.sound.MobFollowingSound;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
-import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -14,15 +15,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Iterator;
@@ -37,7 +37,8 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
     public AnimationState idleAnimationState = new AnimationState();
     private int introTicks;
     private LivingEntity owner;
-    int healingTime;
+    @OnlyIn(Dist.CLIENT)
+    private MobFollowingSound healSound;
 
     public HinderEntity(EntityType<? extends Raider> p_33002_, Level p_33003_) {
         super(p_33002_, p_33003_);
@@ -49,6 +50,17 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
 
     public void setAnimationState(int state) {
         this.entityData.set(ANIMATION_STATE, state);
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity entity) {
+        if (super.isAlliedTo(entity)) {
+            return true;
+        } else if (entity instanceof Raider || entity instanceof EngineerMachine || entity instanceof FactoryMinion) {
+            return this.getTeam() == null && entity.getTeam() == null;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -190,8 +202,14 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
         }
     }
 
+
     @Override
     public void tick() {
+        if (this.level().isClientSide && this.healSound == null) {
+            this.healSound = new MobFollowingSound(this, IllageAndSpillageSoundEvents.ENTITY_ENGINEER_HINDER_HEAL.get(), 0.5F, 2.0F, true);
+            Minecraft.getInstance().getSoundManager().play(this.healSound);
+        }
+
         if (introTicks == 1) {
             this.playSound(SoundEvents.ZOMBIE_ATTACK_IRON_DOOR);
         }
@@ -229,7 +247,6 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
 
                 if (list.isEmpty()) {
                     this.setHealing(false);
-                    this.healingTime = 0;
                 } else {
                     this.setHealing(true);
                     for (Raider entity : list) {
@@ -239,11 +256,6 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
                             if (entity.hasActiveRaid()) entity.getCurrentRaid().updateBossbar();
                         }
                     }
-
-                    if (this.healingTime == 0) {
-                        EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_ENGINEER_HINDER_HEAL.get(), 0.5F, 2.0F, true);
-                    }
-                    this.healingTime++;
                 }
             }
 

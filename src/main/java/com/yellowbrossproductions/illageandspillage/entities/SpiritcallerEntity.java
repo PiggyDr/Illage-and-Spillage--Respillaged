@@ -7,10 +7,7 @@ import com.yellowbrossproductions.illageandspillage.entities.projectile.SoulBeam
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
-import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
-import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
-import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
-import com.yellowbrossproductions.illageandspillage.util.ItemRegisterer;
+import com.yellowbrossproductions.illageandspillage.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -64,7 +61,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
-public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
+public class SpiritcallerEntity extends AbstractIllager {
     public ServerBossEvent bossEvent;
     private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
     private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
@@ -370,7 +367,7 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
 
         this.updateMobList();
-        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !(predicate instanceof IllagerBoss));
+        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
         if (IllageAndSpillageConfig.spiritcaller_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
@@ -394,12 +391,10 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
             }
         }
 
-        if (this.areIllagersNearby()) {
-            this.stopAttackersFromAttacking();
-        }
-
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
+        } else if (bossEvent.isVisible()) {
+            bossEvent.setVisible(false);
         }
 
         if (this.ritualTicks > 0 && !this.isActive() && this.isAlive()) {
@@ -1355,21 +1350,6 @@ public class SpiritcallerEntity extends AbstractIllager implements IllagerBoss {
 
     public boolean isPersistenceRequired() {
         return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
-    }
-
-    public void stopAttackersFromAttacking() {
-        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
-
-        for (Mob attacker : list) {
-            if (attacker.getLastHurtByMob() == this) {
-                attacker.setLastHurtByMob(null);
-            }
-
-            if (attacker.getTarget() == this) {
-                attacker.setTarget(null);
-            }
-        }
-
     }
 
     @Nullable

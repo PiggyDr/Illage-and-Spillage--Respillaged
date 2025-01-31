@@ -39,7 +39,7 @@ import java.time.temporal.ChronoField;
 import java.util.Collections;
 import java.util.List;
 
-public class BossRandomizerEntity extends AbstractIllager implements IllagerBoss {
+public class BossRandomizerEntity extends AbstractIllager {
     private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
 
     public BossRandomizerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {

@@ -350,7 +350,7 @@ public class EyesoreEntity extends Monster implements ICanBeAnimated, IllagerAtt
 
     class AvoidRagnoGoal extends AvoidEntityGoal {
         public AvoidRagnoGoal(PathfinderMob p_25033_, float p_25035_, double p_25036_, double p_25037_) {
-            super(p_25033_, RagnoEntity.class, p_25035_, p_25036_, p_25037_, (predicate) -> ((RagnoEntity) predicate).isCrazy());
+            super(p_25033_, RagnoEntity.class, p_25035_, p_25036_, p_25037_, (predicate) -> EntityUtil.isEntityCrazyRagno((Entity) predicate));
         }
 
         @Override

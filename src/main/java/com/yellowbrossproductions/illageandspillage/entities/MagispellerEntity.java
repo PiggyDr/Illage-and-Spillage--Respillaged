@@ -13,6 +13,7 @@ import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import com.yellowbrossproductions.illageandspillage.util.ItemRegisterer;
+import com.yellowbrossproductions.illageandspillage.util.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -74,7 +75,7 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class MagispellerEntity extends AbstractIllager implements IllagerBoss, ICanBeAnimated {
+public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
     private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
@@ -342,7 +343,7 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
     }
 
     public void tick() {
-        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !(predicate instanceof IllagerBoss));
+        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
         if (IllageAndSpillageConfig.magispeller_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
@@ -366,12 +367,10 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
             }
         }
 
-        if (this.areIllagersNearby()) {
-            this.stopAttackersFromAttacking();
-        }
-
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
+        } else if (bossEvent.isVisible()) {
+            bossEvent.setVisible(false);
         }
 
         if (!this.level().isClientSide && this.isActive() && this.getBossMusic() != null) {
@@ -1910,21 +1909,6 @@ public class MagispellerEntity extends AbstractIllager implements IllagerBoss, I
 
     public boolean canBeAffected(MobEffectInstance p_70687_1_) {
         return p_70687_1_.getEffect() != MobEffects.MOVEMENT_SLOWDOWN && super.canBeAffected(p_70687_1_);
-    }
-
-    public void stopAttackersFromAttacking() {
-        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
-
-        for (Mob attacker : list) {
-            if (attacker.getLastHurtByMob() == this) {
-                attacker.setLastHurtByMob(null);
-            }
-
-            if (attacker.getTarget() == this) {
-                attacker.setTarget(null);
-            }
-        }
-
     }
 
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance p_180481_1_) {

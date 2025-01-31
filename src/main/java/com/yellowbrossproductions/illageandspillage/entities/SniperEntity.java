@@ -56,6 +56,17 @@ public class SniperEntity extends Raider implements FactoryMinion, IllagerAttack
     }
 
     @Override
+    public boolean isAlliedTo(Entity entity) {
+        if (super.isAlliedTo(entity)) {
+            return true;
+        } else if (entity instanceof Raider || entity instanceof EngineerMachine || entity instanceof FactoryMinion) {
+            return this.getTeam() == null && entity.getTeam() == null;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
     }
 

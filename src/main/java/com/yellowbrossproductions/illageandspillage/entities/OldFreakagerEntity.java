@@ -8,10 +8,7 @@ import com.yellowbrossproductions.illageandspillage.entities.projectile.*;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
-import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
-import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
-import com.yellowbrossproductions.illageandspillage.util.ItemRegisterer;
-import com.yellowbrossproductions.illageandspillage.util.PotionRegisterer;
+import com.yellowbrossproductions.illageandspillage.util.*;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -57,7 +54,7 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, ICanBeAnimated {
+public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
     private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
@@ -199,7 +196,7 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
     }
 
     public void tick() {
-        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !(predicate instanceof IllagerBoss));
+        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
         if (IllageAndSpillageConfig.freakager_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
@@ -227,12 +224,10 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
             this.setDeltaMovement(0.0, this.getDeltaMovement().y, 0.0);
         }
 
-        if (this.areIllagersNearby()) {
-            this.stopAttackersFromAttacking();
-        }
-
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
+        } else if (bossEvent.isVisible()) {
+            bossEvent.setVisible(false);
         }
 
         if (!this.level().isClientSide && this.isActive() && this.getBossMusic() != null) {
@@ -260,8 +255,6 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
 
                 this.setAnimationState(1);
             }
-
-//            if (this.introTicks > 21 && this.introTicks - 208 < 50) this.stopAttackersFromAttacking();
 
             if (this.introTicks - 20 == 5) {
                 if (!this.level().isClientSide) {
@@ -745,21 +738,6 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
 
     }
 
-    public void stopAttackersFromAttacking() {
-        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
-
-        for (Mob attacker : list) {
-            if (attacker.getLastHurtByMob() == this) {
-                attacker.setLastHurtByMob(null);
-            }
-
-            if (attacker.getTarget() == this) {
-                attacker.setTarget(null);
-            }
-        }
-
-    }
-
     public boolean startRiding(Entity p_20330_) {
         return (p_20330_ instanceof OldRagnoEntity || p_20330_ instanceof CrocofangEntity || p_20330_ instanceof Ravager) && super.startRiding(p_20330_);
     }
@@ -1084,7 +1062,7 @@ public class OldFreakagerEntity extends AbstractIllager implements IllagerBoss, 
     }
 
     public boolean areIllagersNearby() {
-        return this.entityData.get(NEARBY_ILLAGERS);
+        return this.entityData.get(NEARBY_ILLAGERS) && this.introTicks < 1 && !this.isActive();
     }
 
     public void setIllagersNearby(boolean illagersNearby) {

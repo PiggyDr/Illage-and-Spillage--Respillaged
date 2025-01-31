@@ -58,7 +58,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
-public class OldRagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
+public class OldRagnoEntity extends Raider implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final UUID SPEED_PENALTY_UUID = UUID.fromString("5CD17A52-AB9A-42D3-A629-90FDE04B281E");
     private static final AttributeModifier SPEED_PENALTY;

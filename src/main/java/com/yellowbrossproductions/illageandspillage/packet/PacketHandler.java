@@ -16,8 +16,6 @@ public class PacketHandler {
     public static void init() {
         int id = 0;
         CHANNEL.registerMessage(id++, ParticlePacket.class, ParticlePacket::encode, ParticlePacket::new, ParticlePacket.Handler::onMessage);
-        CHANNEL.registerMessage(id++, WebbedSyncPacket.class, WebbedSyncPacket::encode, WebbedSyncPacket::decode, WebbedSyncPacket::handle);
-        CHANNEL.registerMessage(id++, PreservedSyncPacket.class, PreservedSyncPacket::encode, PreservedSyncPacket::decode, PreservedSyncPacket::handle);
         CHANNEL.registerMessage(id++, JumpscareSyncPacket.class, JumpscareSyncPacket::encode, JumpscareSyncPacket::decode, JumpscareSyncPacket::handle);
         CHANNEL.registerMessage(id++, MobFollowingSoundPacket.class, MobFollowingSoundPacket::encode, MobFollowingSoundPacket::decode, MobFollowingSoundPacket::handle);
     }

@@ -1,13 +1,14 @@
 package com.yellowbrossproductions.illageandspillage.util;
 
-import com.yellowbrossproductions.illageandspillage.capability.PreservedProvider;
-import com.yellowbrossproductions.illageandspillage.capability.WebbedProvider;
+import com.yellowbrossproductions.illageandspillage.access.LivingEntityAccess;
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.AxeEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.BoneEntity;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
-import com.yellowbrossproductions.illageandspillage.packet.*;
+import com.yellowbrossproductions.illageandspillage.packet.MobFollowingSoundPacket;
+import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
+import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -32,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EntityUtil {
     public static boolean displayBossBar(Raider boss) {
@@ -43,10 +43,14 @@ public class EntityUtil {
         return IllageAndSpillageConfig.bossbar_type.get() == 2;
     }
 
+    public static boolean isEntityCrazyRagno(Entity entity) {
+        return entity instanceof RagnoEntity && ((RagnoEntity) entity).isCrazy();
+    }
+
     public static boolean canHurtThisMob(Entity target, Mob attacker) {
-        if ((attacker.getTeam() != null || target.getTeam() != null) && (!(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || ((target instanceof EngineerMachine || target instanceof BeeperEntity || target instanceof PokerEntity || target instanceof SniperEntity) && attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
+        if ((attacker.getTeam() != null || target.getTeam() != null) && (isEntityCrazyRagno(target) || !(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || target instanceof EngineerMachine || target instanceof FactoryMinion) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
             return attacker.getTeam() != target.getTeam();
-        } else if ((!(target instanceof Raider) || (attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && (!(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || ((target instanceof EngineerMachine || target instanceof BeeperEntity || target instanceof PokerEntity || target instanceof SniperEntity) && attacker instanceof RagnoEntity && ((RagnoEntity) attacker).isCrazy())) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
+        } else if ((!(target instanceof Raider) || isEntityCrazyRagno(attacker)) && (isEntityCrazyRagno(target) || !(target instanceof IllagerAttack) || target instanceof FunnyboneEntity || target instanceof EyesoreEntity || target instanceof TrickOrTreatEntity || target instanceof EngineerMachine || target instanceof FactoryMinion) && !(target instanceof AxeEntity) && !(target instanceof BoneEntity)) {
             return attacker != target;
         } else {
             return attacker.getTarget() == target;
@@ -194,28 +198,18 @@ public class EntityUtil {
     }
 
     public static boolean isWebbed(LivingEntity entity) {
-        AtomicBoolean isWebbed = new AtomicBoolean(false);
-        entity.getCapability(WebbedProvider.WEBBED_CAPABILITY).ifPresent(webbed -> isWebbed.set(webbed.isWebbed()));
-        return isWebbed.get();
+        return ((LivingEntityAccess) entity).callIsWebbed();
     }
 
     public static void setWebbed(LivingEntity entity, boolean isWebbed) {
-        entity.getCapability(WebbedProvider.WEBBED_CAPABILITY).ifPresent(webbed -> {
-            webbed.setWebbed(isWebbed);
-            PacketHandler.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new WebbedSyncPacket(entity.getId(), isWebbed));
-        });
+        ((LivingEntityAccess) entity).callSetWebbed(isWebbed);
     }
 
     public static boolean isPreserved(LivingEntity entity) {
-        AtomicBoolean isPreserved = new AtomicBoolean(false);
-        entity.getCapability(PreservedProvider.PRESERVED_CAPABILITY).ifPresent(preserved -> isPreserved.set(preserved.isPreserved()));
-        return isPreserved.get();
+        return ((LivingEntityAccess) entity).callIsPreserved();
     }
 
     public static void setPreserved(LivingEntity entity, boolean isPreserved) {
-        entity.getCapability(PreservedProvider.PRESERVED_CAPABILITY).ifPresent(preserved -> {
-            preserved.setPreserved(isPreserved);
-            PacketHandler.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new PreservedSyncPacket(entity.getId(), isPreserved));
-        });
+        ((LivingEntityAccess) entity).callSetPreserved(isPreserved);
     }
 }

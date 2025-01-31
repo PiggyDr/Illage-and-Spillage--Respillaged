@@ -57,7 +57,7 @@ import net.minecraftforge.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICanBeAnimated {
+public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
     private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
@@ -250,7 +250,7 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
     }
 
     public void tick() {
-        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !(predicate instanceof IllagerBoss));
+        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
         if (IllageAndSpillageConfig.freakager_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
@@ -278,12 +278,10 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
             this.setDeltaMovement(0.0, this.getDeltaMovement().y, 0.0);
         }
 
-        if (this.areIllagersNearby()) {
-            this.stopAttackersFromAttacking();
-        }
-
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
+        } else if (bossEvent.isVisible()) {
+            bossEvent.setVisible(false);
         }
 
         if (!this.level().isClientSide && this.isActive() && this.getBossMusic() != null) {
@@ -937,21 +935,6 @@ public class FreakagerEntity extends AbstractIllager implements IllagerBoss, ICa
                 if (this.attackTicks == 108) {
                     this.setFreakagerFace(0);
                 }
-            }
-        }
-
-    }
-
-    public void stopAttackersFromAttacking() {
-        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
-
-        for (Mob attacker : list) {
-            if (attacker.getLastHurtByMob() == this) {
-                attacker.setLastHurtByMob(null);
-            }
-
-            if (attacker.getTarget() == this) {
-                attacker.setTarget(null);
             }
         }
 

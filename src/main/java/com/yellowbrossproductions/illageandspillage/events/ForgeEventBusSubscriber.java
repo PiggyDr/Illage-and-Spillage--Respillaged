@@ -1,8 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.events;
 
 import com.yellowbrossproductions.illageandspillage.IllageAndSpillage;
-import com.yellowbrossproductions.illageandspillage.capability.PreservedProvider;
-import com.yellowbrossproductions.illageandspillage.capability.WebbedProvider;
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.goal.LoseAIGoal;
@@ -13,9 +11,9 @@ import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.init.RaidWaveMembers;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
+import com.yellowbrossproductions.illageandspillage.util.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -33,7 +31,6 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raid.RaiderType;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -244,7 +241,7 @@ public class ForgeEventBusSubscriber {
     @SubscribeEvent
     public static void tickOffBosses(LivingHurtEvent event) {
         LivingEntity mob = event.getEntity();
-        if (mob instanceof IllagerBoss && mob instanceof Mob targeter) {
+        if (mob.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES) && mob instanceof Mob targeter) {
             Entity var4 = event.getSource().getEntity();
             if (var4 instanceof Player player) {
                 if (!player.getAbilities().invulnerable) {
@@ -270,17 +267,11 @@ public class ForgeEventBusSubscriber {
     public static void preservedEffects(LivingEvent.LivingTickEvent event) {
         LivingEntity mob = event.getEntity();
         if (mob.hasEffect(EffectRegisterer.PRESERVED.get())) {
-            if (!mob.level().isClientSide && !EntityUtil.isPreserved(mob)) EntityUtil.setPreserved(mob, true);
+            if (!mob.level().isClientSide && !EntityUtil.isPreserved(mob)) {
+                EntityUtil.setPreserved(mob, true);
+            }
         } else if (!mob.level().isClientSide && EntityUtil.isPreserved(mob)) {
             EntityUtil.setPreserved(mob, false);
-        }
-    }
-
-    @SubscribeEvent
-    public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof LivingEntity) {
-            event.addCapability(new ResourceLocation("illageandspillage", "webbed"), new WebbedProvider());
-            event.addCapability(new ResourceLocation("illageandspillage", "preserved"), new PreservedProvider());
         }
     }
 }

@@ -65,7 +65,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
+public class RagnoEntity extends Raider implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final UUID SPEED_PENALTY_UUID = UUID.fromString("5CD17A52-AB9A-42D3-A629-90FDE04B281E");
     private static final AttributeModifier SPEED_PENALTY;
@@ -357,15 +357,15 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     }
 
     public boolean isPickable() {
-        return !this.isBurrowing() && !this.isGrabbing() && super.isPickable();
+        return !this.isBurrowing() && !this.isGrabbing() && !this.isAnticheese() && super.isPickable();
     }
 
     public boolean isAttackable() {
-        return !this.isBurrowing() && !this.isGrabbing() && super.isAttackable();
+        return !this.isBurrowing() && !this.isGrabbing() && !this.isAnticheese() && super.isAttackable();
     }
 
     public boolean attackable() {
-        return !this.isBurrowing() && !this.isGrabbing() && super.attackable();
+        return !this.isBurrowing() && !this.isGrabbing() && !this.isAnticheese() && super.attackable();
     }
 
     public SoundEvent getTransMusic() {
@@ -2002,7 +2002,7 @@ public class RagnoEntity extends Raider implements IllagerBoss, ICanBeAnimated {
     public boolean hurt(DamageSource damageSource, float amount) {
         if (this.getOwner() != null && damageSource.getEntity() == this.getOwner()) {
             return false;
-        } else if ((this.isBurrowing() || this.isGrabbing()) && !damageSource.is(DamageTypes.FELL_OUT_OF_WORLD) && !damageSource.is(DamageTypes.GENERIC_KILL)) {
+        } else if ((this.isBurrowing() || this.isGrabbing() || this.isAnticheese()) && !damageSource.is(DamageTypes.FELL_OUT_OF_WORLD) && !damageSource.is(DamageTypes.GENERIC_KILL)) {
             return false;
         } else {
             if (this.isAlive() && !damageSource.is(DamageTypes.FELL_OUT_OF_WORLD) && !damageSource.is(DamageTypes.GENERIC_KILL) && (!this.isCrazy() || isMobNotInCreativeMode(damageSource.getEntity()))) {

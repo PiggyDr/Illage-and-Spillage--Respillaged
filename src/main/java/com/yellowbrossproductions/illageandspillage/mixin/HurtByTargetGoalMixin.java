@@ -1,8 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.mixin;
 
-import com.yellowbrossproductions.illageandspillage.entities.EngineerMachine;
-import com.yellowbrossproductions.illageandspillage.entities.FactoryMinion;
-import com.yellowbrossproductions.illageandspillage.entities.RagnoEntity;
+import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -10,7 +8,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,8 +43,9 @@ public abstract class HurtByTargetGoalMixin extends TargetGoal {
                 cir.setReturnValue(false);
             } else {
                 for (Class<?> oclass : this.toIgnoreDamage) {
-                    if ((oclass.isAssignableFrom(livingentity.getClass()) || ((this.mob instanceof Raider || this.mob instanceof EngineerMachine || this.mob instanceof FactoryMinion) && (livingentity instanceof EngineerMachine || livingentity instanceof FactoryMinion))) && (!(livingentity instanceof RagnoEntity) || !((RagnoEntity) livingentity).isCrazy())) {
+                    if (oclass.isAssignableFrom(livingentity.getClass()) && !EntityUtil.isEntityCrazyRagno(livingentity)) {
                         cir.setReturnValue(false);
+                        return;
                     }
                 }
 

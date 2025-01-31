@@ -295,6 +295,7 @@ public class TwittollagerEntity extends AbstractIllager {
         this.setExplode(true);
         this.playSound(IllageAndSpillageSoundEvents.ENTITY_TWITTOLLAGER_EXPLODE.get(), 6.0F, 1.0F);
         this.playSound(IllageAndSpillageSoundEvents.ENTITY_TWITTOLLAGER_SCREAM.get(), 6.0F, 1.0F);
+        CameraShakeEntity.cameraShake(this.level(), this.position(), 30.0F, 0.4F, 0, 20);
         if (!this.canExplodeInfinitely) this.kill();
         this.makeExplodeParticles();
         if (!this.level().isClientSide) {

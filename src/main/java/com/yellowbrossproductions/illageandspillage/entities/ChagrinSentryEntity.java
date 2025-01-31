@@ -14,10 +14,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -81,6 +78,17 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
 
     public void setAnimationState(int state) {
         this.entityData.set(ANIMATION_STATE, state);
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity entity) {
+        if (super.isAlliedTo(entity)) {
+            return true;
+        } else if (entity instanceof Raider || entity instanceof EngineerMachine || entity instanceof FactoryMinion) {
+            return this.getTeam() == null && entity.getTeam() == null;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -326,9 +334,7 @@ public class ChagrinSentryEntity extends Raider implements ICanBeAnimated, Engin
 
                 ParticlePacket packet = new ParticlePacket();
 
-                for (int i = 0; i < 1; ++i) {
-                    packet.queueParticle(ParticleTypes.SMOKE, false, new Vec3(this.getRandomX(0.15) + (-0.5 + this.random.nextDouble()) * 2.5, this.getRandomY() + (-0.5 + this.random.nextDouble()) * 1.5, this.getRandomZ(0.15) + (-0.5 + this.random.nextDouble()) * 2.5), new Vec3(0, 0, 0));
-                }
+                packet.queueParticle(ParticleTypes.SMOKE, false, new Vec3(this.getRandomX(0.15) + (-0.5 + this.random.nextDouble()) * 2.5, this.getRandomY() + (-0.5 + this.random.nextDouble()) * 1.5, this.getRandomZ(0.15) + (-0.5 + this.random.nextDouble()) * 2.5), new Vec3(0, 0, 0));
 
                 ServerPlayer finalServerPlayer = serverPlayer;
                 PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> finalServerPlayer), packet);

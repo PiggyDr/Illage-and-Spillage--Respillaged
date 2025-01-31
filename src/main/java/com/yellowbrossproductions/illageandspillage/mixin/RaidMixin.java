@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.mixin;
 
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
-import com.yellowbrossproductions.illageandspillage.entities.IllagerBoss;
+import com.yellowbrossproductions.illageandspillage.util.ModTags;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.entity.raid.Raid;
@@ -51,12 +51,12 @@ public abstract class RaidMixin {
 
     @Unique
     private List<Raider> getBossesInRaid() {
-        return this.groupRaiderMap.values().stream().flatMap(Set::stream).filter(r -> r instanceof IllagerBoss).collect(Collectors.toList());
+        return this.groupRaiderMap.values().stream().flatMap(Set::stream).filter(r -> r.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES)).collect(Collectors.toList());
     }
 
     @Unique
     private List<Raider> getNonBossesInRaid() {
-        return this.groupRaiderMap.values().stream().flatMap(Set::stream).filter(r -> !(r instanceof IllagerBoss)).collect(Collectors.toList());
+        return this.groupRaiderMap.values().stream().flatMap(Set::stream).filter(r -> !r.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES)).collect(Collectors.toList());
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
@@ -88,7 +88,6 @@ public abstract class RaidMixin {
         } else {
             if (this.onlyBosses) {
                 this.onlyBosses = false;
-                this.raidEvent.setDarkenScreen(false);
 
                 float newRaiderHP = 0.0F;
 
@@ -102,6 +101,7 @@ public abstract class RaidMixin {
                 }
 
                 this.totalHealth = this.previousTotalHealth + newRaiderHP;
+                this.raidEvent.setDarkenScreen(false);
             }
         }
     }

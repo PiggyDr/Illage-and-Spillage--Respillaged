@@ -4,6 +4,7 @@ import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConf
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
+import com.yellowbrossproductions.illageandspillage.util.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -57,7 +58,7 @@ import net.minecraftforge.event.entity.EntityTeleportEvent;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss {
+public class OldMagispellerEntity extends AbstractIllager {
     public ServerBossEvent bossEvent;
     private final List<FakeMagispellerEntity> clones = new ArrayList<>();
     private static final EntityDataAccessor<Boolean> FAKING;
@@ -196,7 +197,7 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
     }
 
     public void tick() {
-        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !(predicate instanceof IllagerBoss));
+        List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
         if (IllageAndSpillageConfig.magispeller_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
@@ -275,12 +276,10 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
             this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() - (double) f1 * 0.6, this.getY() + 1.8, this.getZ() - (double) f2 * 0.6, 0.1, 0.1, 0.2);
         }
 
-        if (this.areIllagersNearby()) {
-            this.stopAttackersFromAttacking();
-        }
-
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {
             bossEvent.setVisible(true);
+        } else if (bossEvent.isVisible()) {
+            bossEvent.setVisible(false);
         }
 
         if (this.isFaking()) {
@@ -682,7 +681,7 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
     }
 
     public boolean areIllagersNearby() {
-        return this.entityData.get(NEARBY_ILLAGERS);
+        return this.entityData.get(NEARBY_ILLAGERS) && !this.isActive();
     }
 
     public void setIllagersNearby(boolean illagersNearby) {
@@ -759,21 +758,6 @@ public class OldMagispellerEntity extends AbstractIllager implements IllagerBoss
 
     public boolean canBeAffected(MobEffectInstance p_70687_1_) {
         return p_70687_1_.getEffect() != MobEffects.MOVEMENT_SLOWDOWN && super.canBeAffected(p_70687_1_);
-    }
-
-    public void stopAttackersFromAttacking() {
-        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(100.0));
-
-        for (Mob attacker : list) {
-            if (attacker.getLastHurtByMob() == this) {
-                attacker.setLastHurtByMob(null);
-            }
-
-            if (attacker.getTarget() == this) {
-                attacker.setTarget(null);
-            }
-        }
-
     }
 
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance p_180481_1_) {

@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class MobFollowingSound extends AbstractTickableSoundInstance {
     private final Entity entity;
-    private final float volumeMultiplier;
+    private float volumeMultiplier;
     private final float pitchMultiplier;
 
     public MobFollowingSound(Entity entity, SoundEvent sound, float volume, float pitch, boolean loop) {
@@ -45,16 +45,16 @@ public class MobFollowingSound extends AbstractTickableSoundInstance {
                 this.y = this.entity.getY();
                 this.z = this.entity.getZ();
             }
+
+            if (this.entity instanceof HinderEntity) {
+                this.volumeMultiplier = ((HinderEntity) this.entity).isHealing() ? 0.5F : 0.0F;
+            }
         } else this.stop();
     }
 
     private boolean additionalPlayConditions() {
         if (this.entity instanceof CrocofangEntity) {
             return ((CrocofangEntity) this.entity).isCharging();
-        }
-
-        if (this.entity instanceof HinderEntity) {
-            return ((HinderEntity) this.entity).isHealing();
         }
 
         return true;

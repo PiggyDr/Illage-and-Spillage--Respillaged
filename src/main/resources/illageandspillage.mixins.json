@@ -6,6 +6,7 @@
   "refmap": "illageandspillage.mixins.refmap.json",
   "mixins": [
     "HurtByTargetGoalMixin",
+    "LivingEntityMixin",
     "RaidMixin"
   ],
   "client": [

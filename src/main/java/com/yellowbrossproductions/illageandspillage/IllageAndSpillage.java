@@ -1,7 +1,6 @@
 package com.yellowbrossproductions.illageandspillage;
 
 import com.mojang.logging.LogUtils;
-import com.yellowbrossproductions.illageandspillage.capability.IWebbed;
 import com.yellowbrossproductions.illageandspillage.config.Config;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.SpawnPlacements.Type;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,7 +47,6 @@ public class IllageAndSpillage {
         PROXY.init(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerCapabilities);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -78,10 +75,6 @@ public class IllageAndSpillage {
         SpawnPlacements.register(ModEntityTypes.OldMagispeller.get(), Type.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
         SpawnPlacements.register(ModEntityTypes.Kaboomer.get(), Type.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
         PacketHandler.init();
-    }
-
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(IWebbed.class);
     }
 
     @EventBusSubscriber(bus = Bus.MOD)

@@ -1,9 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.packet.JumpscareSyncPacket;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
-import com.yellowbrossproductions.illageandspillage.packet.WebbedSyncPacket;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;

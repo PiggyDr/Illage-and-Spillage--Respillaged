@@ -3,6 +3,7 @@ package com.yellowbrossproductions.illageandspillage.events;
 import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.entities.CameraShakeEntity;
 import com.yellowbrossproductions.illageandspillage.entities.RagnoEntity;
+import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -45,7 +46,7 @@ public enum ClientEventHandler {
     @SubscribeEvent
     public void onPreRenderHUD(RenderGuiOverlayEvent.Pre event) {
         Player player = Minecraft.getInstance().player;
-        if (player != null && player.isPassenger() && player.getVehicle() instanceof RagnoEntity && ((RagnoEntity) player.getVehicle()).isCrazy() && event.getOverlay().id().equals(VanillaGuiOverlay.HELMET.id())) {
+        if (player != null && player.isPassenger() && EntityUtil.isEntityCrazyRagno(player.getVehicle()) && event.getOverlay().id().equals(VanillaGuiOverlay.HELMET.id())) {
             Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("entity.illageandspillage.no_escape"), false);
         }
     }
