@@ -43,11 +43,11 @@ public class MobFollowingSoundPacket {
     public static void handle(MobFollowingSoundPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             final Level level = ClientHelper.getLevel();
-            if (level == null) return;
-
-            Entity entity = level.getEntity(msg.entityId);
-            if (entity != null && msg.sound != null) {
-                MobFollowingSoundPlayer.playMusic(entity, msg.sound, msg.volume, msg.pitch, msg.loop);
+            if (level != null) {
+                Entity entity = level.getEntity(msg.entityId);
+                if (entity != null && msg.sound != null) {
+                    MobFollowingSoundPlayer.playSound(level, entity, msg.sound, msg.volume, msg.pitch, msg.loop);
+                }
             }
         });
         ctx.get().setPacketHandled(true);

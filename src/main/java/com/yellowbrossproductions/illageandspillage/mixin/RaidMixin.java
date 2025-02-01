@@ -40,6 +40,9 @@ public abstract class RaidMixin {
     @Shadow
     public abstract boolean isOver();
 
+    @Shadow
+    public abstract void updateBossbar();
+
     @Unique
     private static final String BOSSES_REMAINING = "event.illageandspillage.raid.bosses_remaining";
     @Unique
@@ -85,6 +88,8 @@ public abstract class RaidMixin {
             } else if (bosses.size() == 1) {
                 this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(bosses.get(0).getDisplayName()));
             }
+
+            this.updateBossbar();
         } else {
             if (this.onlyBosses) {
                 this.onlyBosses = false;

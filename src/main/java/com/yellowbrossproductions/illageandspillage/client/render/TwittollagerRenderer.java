@@ -1,6 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.client.render;
 
 import com.yellowbrossproductions.illageandspillage.client.model.TwittollagerModel;
+import com.yellowbrossproductions.illageandspillage.client.render.layer.TwittollagerPhoneLayer;
 import com.yellowbrossproductions.illageandspillage.entities.TwittollagerEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -12,11 +13,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class TwittollagerRenderer extends MobRenderer<TwittollagerEntity, TwittollagerModel<TwittollagerEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("illageandspillage", "textures/entity/twittollager.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation("illageandspillage", "textures/entity/twittollager/twittollager.png");
 
     public TwittollagerRenderer(EntityRendererProvider.Context renderManagerIn) {
         super(renderManagerIn, new TwittollagerModel<>(renderManagerIn.bakeLayer(TwittollagerModel.LAYER_LOCATION)), 0.5F);
         this.addLayer(new CustomHeadLayer<>(this, renderManagerIn.getModelSet(), renderManagerIn.getItemInHandRenderer()));
+        this.addLayer(new TwittollagerPhoneLayer<>(this));
     }
 
     public Vec3 getRenderOffset(TwittollagerEntity twittollager, float p_114337_) {

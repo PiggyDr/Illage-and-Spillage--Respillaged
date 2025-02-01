@@ -215,10 +215,6 @@ public class OldMagispellerEntity extends AbstractIllager {
                     this.remove(RemovalReason.DISCARDED);
                 }
             }
-
-            if (this.getCurrentRaid() != null) {
-                this.getCurrentRaid().updateBossbar();
-            }
         }
 
         if (this.attackType > 0) {

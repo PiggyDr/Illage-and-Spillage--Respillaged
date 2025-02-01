@@ -361,10 +361,6 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
                     this.remove(RemovalReason.DISCARDED);
                 }
             }
-
-            if (this.getCurrentRaid() != null) {
-                this.getCurrentRaid().updateBossbar();
-            }
         }
 
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {

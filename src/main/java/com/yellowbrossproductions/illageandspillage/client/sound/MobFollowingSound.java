@@ -15,6 +15,7 @@ public class MobFollowingSound extends AbstractTickableSoundInstance {
     private final Entity entity;
     private float volumeMultiplier;
     private final float pitchMultiplier;
+    private int timePlayed;
 
     public MobFollowingSound(Entity entity, SoundEvent sound, float volume, float pitch, boolean loop) {
         super(sound, entity.getSoundSource(), SoundInstance.createUnseededRandom());
@@ -46,15 +47,18 @@ public class MobFollowingSound extends AbstractTickableSoundInstance {
                 this.z = this.entity.getZ();
             }
 
-            if (this.entity instanceof HinderEntity) {
-                this.volumeMultiplier = ((HinderEntity) this.entity).isHealing() ? 0.5F : 0.0F;
-            }
         } else this.stop();
+
+        this.timePlayed++;
     }
 
     private boolean additionalPlayConditions() {
         if (this.entity instanceof CrocofangEntity) {
-            return ((CrocofangEntity) this.entity).isCharging();
+            return ((CrocofangEntity) this.entity).isCharging() || this.timePlayed < 1;
+        }
+
+        if (this.entity instanceof HinderEntity) {
+            return ((HinderEntity) this.entity).isHealing() || this.timePlayed < 1;
         }
 
         return true;

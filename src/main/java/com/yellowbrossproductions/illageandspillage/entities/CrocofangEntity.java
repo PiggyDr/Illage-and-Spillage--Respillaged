@@ -224,9 +224,6 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
                         }
                         this.setAnimationState(3);
                         this.setCharge(motionX, motionZ);
-                    }
-
-                    if (this.chargeTime == 31) {
                         EntityUtil.mobFollowingSound(this.level(), this, IllageAndSpillageSoundEvents.ENTITY_CROCOFANG_CHARGE.get(), 3.0F, 1.0F, false);
                     }
 

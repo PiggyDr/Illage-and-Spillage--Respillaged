@@ -271,10 +271,6 @@ public class OldRagnoEntity extends Raider implements ICanBeAnimated {
             this.setDeltaMovement(0.0, this.getDeltaMovement().y, 0.0);
         }
 
-        if (this.hasActiveRaid() && this.getCurrentRaid() != null) {
-            this.getCurrentRaid().updateBossbar();
-        }
-
         if (this.owner == null && this.tickCount > 5) {
             List<FreakagerEntity> list = this.level().getEntitiesOfClass(FreakagerEntity.class, this.getBoundingBox().inflate(2.0));
             if (!list.isEmpty()) {

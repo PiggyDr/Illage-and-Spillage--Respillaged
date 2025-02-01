@@ -385,10 +385,6 @@ public class SpiritcallerEntity extends AbstractIllager {
                     this.remove(RemovalReason.DISCARDED);
                 }
             }
-
-            if (this.getCurrentRaid() != null) {
-                this.getCurrentRaid().updateBossbar();
-            }
         }
 
         if (EntityUtil.displayBossBar(this) && this.isActive() && !bossEvent.isVisible()) {

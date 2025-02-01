@@ -214,10 +214,6 @@ public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimate
                     this.remove(RemovalReason.DISCARDED);
                 }
             }
-
-            if (this.getCurrentRaid() != null) {
-                this.getCurrentRaid().updateBossbar();
-            }
         }
 
         if (this.introTicks > 0) {
