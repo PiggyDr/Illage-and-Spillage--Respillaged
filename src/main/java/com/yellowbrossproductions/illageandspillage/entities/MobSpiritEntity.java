@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.nbt.CompoundTag;
@@ -87,7 +87,7 @@ public class MobSpiritEntity extends Monster {
 
     public boolean hurt(DamageSource source, float amount) {
         Entity attacker = source.getEntity();
-        if (IllageAndSpillageConfig.nightmare_mode.get() && (attacker instanceof SpiritcallerEntity || attacker instanceof IllagerSoulEntity))
+        if (Config.CommonConfig.nightmare_mode.get() && (attacker instanceof SpiritcallerEntity || attacker instanceof IllagerSoulEntity))
             return false;
 
         return super.hurt(source, amount);

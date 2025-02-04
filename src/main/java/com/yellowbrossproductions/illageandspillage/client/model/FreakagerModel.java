@@ -16,6 +16,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 
+import java.util.Calendar;
+
 public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> implements CustomHeadedModel, ArmedModel {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(IllageAndSpillage.MOD_ID, "freakager"), "main");
     private final ModelPart root;
@@ -45,6 +47,12 @@ public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> imple
         PartDefinition head2 = villager.addOrReplaceChild("head2", CubeListBuilder.create().texOffs(128, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -24.0F, 0.0F));
 
         head2.addOrReplaceChild("nose2", CubeListBuilder.create().texOffs(152, 0).addBox(-1.0F, -1.0F, -6.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -2.0F, 0.0F));
+
+        PartDefinition birthday2 = head2.addOrReplaceChild("birthday2", CubeListBuilder.create().texOffs(77, 30).addBox(-2.0F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(65, 30).addBox(-1.5F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(90, 27).addBox(0.0F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.6667F, -8.0833F));
+
+        birthday2.addOrReplaceChild("thingy2", CubeListBuilder.create().texOffs(90, 30).addBox(-1.5F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         villager.addOrReplaceChild("left_leg3", CubeListBuilder.create().texOffs(128, 22).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(2.0F, -12.0F, 0.0F));
 
@@ -106,6 +114,7 @@ public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> imple
                 .texOffs(144, 90).addBox(7.0F, -0.5F, -9.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(128, 68).addBox(6.0F, -0.5F, 9.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.0F, 7.6F, -4.0F, -3.1416F, -0.7418F, 1.5708F));
 
+
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -11.0F, 0.0F));
 
         PartDefinition nose = head.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(24, 0).addBox(-1.0F, -1.0F, -6.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -2.0F, 0.0F));
@@ -120,6 +129,12 @@ public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> imple
         hat.addOrReplaceChild("hat_littlepiece2", CubeListBuilder.create().texOffs(120, 4).addBox(1.5F, -7.0F, -1.5F, 0.0F, 7.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.0F, -0.5F, -1.0F, 0.0F, 0.1745F, 0.2618F));
 
         head.addOrReplaceChild("body_smaller", CubeListBuilder.create().texOffs(0, 58).addBox(-4.0F, -3.0F, -7.0F, 8.0F, 4.0F, 8.0F, new CubeDeformation(0.3F)), PartPose.offsetAndRotation(0.0F, -1.0F, 3.0F, 0.0873F, 0.0F, 0.0F));
+
+        PartDefinition birthday = head.addOrReplaceChild("birthday", CubeListBuilder.create().texOffs(77, 21).addBox(-2.0F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(65, 21).addBox(-1.5F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(90, 18).addBox(0.0F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.0F, -4.6667F, -9.0833F, 0.0F, 0.0F, 0.1745F));
+
+        birthday.addOrReplaceChild("thingy", CubeListBuilder.create().texOffs(90, 21).addBox(-1.5F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         body.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 22).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(2.0F, 1.0F, 0.0F));
 
@@ -157,6 +172,10 @@ public class FreakagerModel<T extends Entity> extends HierarchicalModel<T> imple
             this.animate(freakager.getAnimationState("trickortreat"), FreakagerAnimation.TRICKORTREAT, ageInTicks, freakager.getAnimationSpeed());
             this.animate(freakager.getAnimationState("anticheese"), FreakagerAnimation.ANTICHEESE, ageInTicks, freakager.getAnimationSpeed());
             this.animate(freakager.getAnimationState("phase"), FreakagerAnimation.PHASE, ageInTicks, freakager.getAnimationSpeed());
+
+            Calendar calendar = Calendar.getInstance();
+            head.getChild("birthday").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
+            this.villager.getChild("head2").getChild("birthday2").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
 
             head.yRot += netHeadYaw * ((float) Math.PI / 180F);
             head.xRot += headPitch * ((float) Math.PI / 180F);

@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.items;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,7 +19,7 @@ public class TotemOfBanishmentItemBase extends Item {
     }
 
     public InteractionResultHolder<ItemStack> use(Level p_77659_1_, Player p_77659_2_, InteractionHand p_77659_3_) {
-        List<LivingEntity> list = p_77659_2_.level().getEntitiesOfClass(LivingEntity.class, p_77659_2_.getBoundingBox().inflate(20.0), (predicate) -> predicate.getEncodeId() != null && IllageAndSpillageConfig.banishable_mobs.get().contains(predicate.getEncodeId()));
+        List<LivingEntity> list = p_77659_2_.level().getEntitiesOfClass(LivingEntity.class, p_77659_2_.getBoundingBox().inflate(20.0), (predicate) -> predicate.getEncodeId() != null && Config.CommonConfig.banishable_mobs.get().contains(predicate.getEncodeId()));
         if (!list.isEmpty()) {
             for (LivingEntity entity : list) {
                 entity.kill();

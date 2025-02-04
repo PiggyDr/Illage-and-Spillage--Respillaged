@@ -2,7 +2,7 @@ package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.client.sound.BossMusicPlayer;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.PumpkinBombEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.WebEntity;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
@@ -110,7 +110,7 @@ public class OldRagnoEntity extends Raider implements ICanBeAnimated {
     public OldRagnoEntity(EntityType<? extends Raider> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 40;
-        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
         bossEvent.setVisible(false);
     }
 

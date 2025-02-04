@@ -13,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
+import java.util.Calendar;
+
 public class FunnyboneModel<T extends Entity> extends HierarchicalModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("illageandspillage", "funnybone"), "main");
     private final ModelPart root;
@@ -74,8 +76,14 @@ public class FunnyboneModel<T extends Entity> extends HierarchicalModel<T> {
         PartDefinition ribs = spine.addOrReplaceChild("ribs", CubeListBuilder.create().texOffs(0, 24).addBox(-3.0F, -5.0F, -4.0F, 6.0F, 5.0F, 4.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 25).addBox(-1.0F, -7.0F, 0.0F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -5.0F, 1.5F, 0.6545F, 0.0F, 0.0F));
 
-        ribs.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -5.0F, 8.0F, 6.0F, 8.0F, new CubeDeformation(0.0F))
+        PartDefinition head2 = ribs.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -5.0F, 8.0F, 6.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 14).addBox(-3.0F, -2.0F, -5.0F, 6.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -7.0F, -0.5F, -0.8727F, 0.0F, 0.0F));
+
+        PartDefinition birthday = head2.addOrReplaceChild("birthday", CubeListBuilder.create().texOffs(40, 45).addBox(-2.0F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(28, 45).addBox(-1.5F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(53, 42).addBox(0.0F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -1.6667F, -9.0833F));
+
+        birthday.addOrReplaceChild("thingy", CubeListBuilder.create().texOffs(53, 45).addBox(-1.5F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition arm3 = ribs.addOrReplaceChild("arm3", CubeListBuilder.create().texOffs(26, 32).mirror().addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(-4.0F, -5.0F, -1.5F, 0.121F, -0.05F, 0.3897F));
 
@@ -118,6 +126,9 @@ public class FunnyboneModel<T extends Entity> extends HierarchicalModel<T> {
             this.animate(funnybone.getAnimationState("fly"), FunnyboneAnimation.FLY, ageInTicks, funnybone.getAnimationSpeed());
             this.animate(funnybone.getAnimationState("spawn"), FunnyboneAnimation.SPAWN, ageInTicks, funnybone.getAnimationSpeed());
             this.animate(funnybone.getAnimationState("throw"), FunnyboneAnimation.THROW, ageInTicks, funnybone.getAnimationSpeed());
+
+            Calendar calendar = Calendar.getInstance();
+            this.head.getChild("birthday").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
 
             this.bone_weapon.visible = funnybone.shouldShowBone();
 

@@ -2,7 +2,7 @@ package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.client.sound.BossMusicPlayer;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.PumpkinBombEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.WebEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.WebNetEntity;
@@ -142,8 +142,10 @@ public class RagnoEntity extends Raider implements ICanBeAnimated {
     public RagnoEntity(EntityType<? extends Raider> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 40;
-        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
         bossEvent.setVisible(false);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.CommonConfig.ragno_health.get());
+        this.heal(Float.MAX_VALUE);
     }
 
     public void startSeenByPlayer(ServerPlayer p_20119_) {
@@ -186,7 +188,7 @@ public class RagnoEntity extends Raider implements ICanBeAnimated {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.ragno_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0).add(Attributes.ARMOR, 10.0).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 1).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0).add(Attributes.ARMOR, 10.0).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
@@ -2075,7 +2077,7 @@ public class RagnoEntity extends Raider implements ICanBeAnimated {
     }
 
     public boolean isPersistenceRequired() {
-        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
+        return !Config.CommonConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     public double getPassengersRidingOffset() {

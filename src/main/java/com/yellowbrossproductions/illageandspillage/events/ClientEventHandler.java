@@ -1,8 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.events;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.CameraShakeEntity;
-import com.yellowbrossproductions.illageandspillage.entities.RagnoEntity;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -21,7 +20,7 @@ public enum ClientEventHandler {
     @SubscribeEvent
     public void onSetupCamera(ViewportEvent.ComputeCameraAngles event) {
         Player player = Minecraft.getInstance().player;
-        if (IllageAndSpillageConfig.cameraShakesAllowed.get() && !Minecraft.getInstance().isPaused() && player != null) {
+        if (Config.ClientConfig.cameraShakesAllowed.get() && !Minecraft.getInstance().isPaused() && player != null) {
             float delta = Minecraft.getInstance().getFrameTime();
             float ticksExistedDelta = (float) player.tickCount + delta;
             float shakeAmplitude = 0.0F;

@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
@@ -201,7 +201,7 @@ public class PreserverEntity extends AbstractIllager {
     }
 
     public boolean isSomethingProtectableNearby() {
-        return !this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(12.0), (predicate) -> !(predicate instanceof IllagerAttack) && !(predicate instanceof EngineerMachine) && !(predicate instanceof FactoryMinion) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, this) && !(IllageAndSpillageConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId())).isEmpty();
+        return !this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(12.0), (predicate) -> !(predicate instanceof IllagerAttack) && !(predicate instanceof EngineerMachine) && !(predicate instanceof FactoryMinion) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, this) && !(Config.CommonConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId())).isEmpty();
     }
 
     protected float getStandingEyeHeight(Pose p_21131_, EntityDimensions p_21132_) {
@@ -227,7 +227,7 @@ public class PreserverEntity extends AbstractIllager {
         }
 
         public void start() {
-            List<Raider> list = PreserverEntity.this.level().getEntitiesOfClass(Raider.class, PreserverEntity.this.getBoundingBox().inflate(6.0), (predicate) -> !(predicate instanceof IllagerAttack) && !(predicate instanceof EngineerMachine) && !(predicate instanceof FactoryMinion) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && PreserverEntity.this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, PreserverEntity.this) && !(IllageAndSpillageConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId()));
+            List<Raider> list = PreserverEntity.this.level().getEntitiesOfClass(Raider.class, PreserverEntity.this.getBoundingBox().inflate(6.0), (predicate) -> !(predicate instanceof IllagerAttack) && !(predicate instanceof EngineerMachine) && !(predicate instanceof FactoryMinion) && (double) predicate.getBbWidth() < 1.0 && (double) predicate.getBbHeight() < 2.5 && PreserverEntity.this.hasLineOfSight(predicate) && predicate.isAlive() && !(predicate instanceof PreserverEntity) && !predicate.hasEffect(EffectRegisterer.PRESERVED.get()) && EntityUtil.isMobNotOnOtherTeam(predicate, PreserverEntity.this) && !(Config.CommonConfig.preserver_cannotProtect.get()).contains(predicate.getEncodeId()));
             if (!list.isEmpty()) {
                 LivingEntity thing = list.get(PreserverEntity.this.random.nextInt(list.size()));
                 PreserverEntity.this.setThingToProtect(thing);

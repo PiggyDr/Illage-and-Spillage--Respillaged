@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.events;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -25,19 +25,19 @@ public class NightmareEvents {
     public static void onHurt(LivingHurtEvent event) {
         LivingEntity victim = event.getEntity();
         Entity attacker = event.getSource().getEntity();
-        if (IllageAndSpillageConfig.nightmare_mode.get() && (attacker instanceof MagispellerEntity || attacker instanceof FakeMagispellerEntity || attacker instanceof IllashooterEntity || attacker instanceof CrashagerEntity || attacker instanceof KaboomerEntity)) {
-            event.setAmount((float) (event.getAmount() * IllageAndSpillageConfig.magi_damage_multiplier.get()));
+        if (Config.CommonConfig.nightmare_mode.get() && (attacker instanceof MagispellerEntity || attacker instanceof FakeMagispellerEntity || attacker instanceof IllashooterEntity || attacker instanceof CrashagerEntity || attacker instanceof KaboomerEntity)) {
+            event.setAmount((float) (event.getAmount() * Config.CommonConfig.magi_damage_multiplier.get()));
         }
-        if (IllageAndSpillageConfig.nightmare_mode.get() && (attacker instanceof FreakagerEntity || attacker instanceof OldFreakagerEntity || attacker instanceof EyesoreEntity || attacker instanceof FunnyboneEntity)) {
-            event.setAmount((float) (event.getAmount() * IllageAndSpillageConfig.freaky_damage_multiplier.get()));
+        if (Config.CommonConfig.nightmare_mode.get() && (attacker instanceof FreakagerEntity || attacker instanceof OldFreakagerEntity || attacker instanceof EyesoreEntity || attacker instanceof FunnyboneEntity)) {
+            event.setAmount((float) (event.getAmount() * Config.CommonConfig.freaky_damage_multiplier.get()));
         }
-        if (IllageAndSpillageConfig.nightmare_mode.get() && (attacker instanceof RagnoEntity || attacker instanceof OldRagnoEntity)) {
-            event.setAmount((float) (event.getAmount() * (IllageAndSpillageConfig.ragno_damage_multiplier.get())));
+        if (Config.CommonConfig.nightmare_mode.get() && (attacker instanceof RagnoEntity || attacker instanceof OldRagnoEntity)) {
+            event.setAmount((float) (event.getAmount() * (Config.CommonConfig.ragno_damage_multiplier.get())));
         }
-        if (IllageAndSpillageConfig.nightmare_mode.get() && (attacker instanceof SpiritcallerEntity || attacker instanceof MobSpiritEntity || attacker instanceof IllagerSoulEntity)) {
-            event.setAmount((float) (event.getAmount() * IllageAndSpillageConfig.spiri_damage_multiplier.get()));
+        if (Config.CommonConfig.nightmare_mode.get() && (attacker instanceof SpiritcallerEntity || attacker instanceof MobSpiritEntity || attacker instanceof IllagerSoulEntity)) {
+            event.setAmount((float) (event.getAmount() * Config.CommonConfig.spiri_damage_multiplier.get()));
         }
-        if (IllageAndSpillageConfig.nightmare_mode.get() && attacker instanceof KaboomerEntity && victim.getUseItem().getItem() instanceof ShieldItem) {
+        if (Config.CommonConfig.nightmare_mode.get() && attacker instanceof KaboomerEntity && victim.getUseItem().getItem() instanceof ShieldItem) {
             victim.getUseItem().shrink(victim.getUseItem().getCount());
         }
     }
@@ -47,7 +47,7 @@ public class NightmareEvents {
         Level level = event.getEntity().level();
         Entity entity = event.getEntity();
 
-        if (!IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get() || level.isClientSide() || !(level instanceof ServerLevel) || (level.dimension() == Level.NETHER && event.getEntity() instanceof EnderMan) || entity instanceof Blaze || entity instanceof EnderDragon || ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()) == null || ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()).getNamespace().equals("illageandspillage")) {
+        if (!Config.CommonConfig.ULTIMATE_NIGHTMARE.get() || level.isClientSide() || !(level instanceof ServerLevel) || (level.dimension() == Level.NETHER && event.getEntity() instanceof EnderMan) || entity instanceof Blaze || entity instanceof EnderDragon || ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()) == null || ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()).getNamespace().equals("illageandspillage")) {
             return;
         }
 
@@ -145,7 +145,7 @@ public class NightmareEvents {
 //    @SubscribeEvent
 //    public static void onJoinLevel(EntityJoinLevelEvent event) {
 //        Entity entity = event.getEntity();
-//        if (IllageAndSpillageConfig.nightmare_mode.get() && entity instanceof SpiritcallerEntity) {
+//        if (Config.CommonConfig.nightmare_mode.get() && entity instanceof SpiritcallerEntity) {
 //            ItemStack head = new ItemStack(Items.NETHERITE_HELMET);
 //            head.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 3);
 //            head.enchant(Enchantments.UNBREAKING, 255);
@@ -166,7 +166,7 @@ public class NightmareEvents {
 //            entity.setItemSlot(EquipmentSlot.CHEST, chest);
 //            entity.setItemSlot(EquipmentSlot.LEGS, legs);
 //            entity.setItemSlot(EquipmentSlot.FEET, feet);
-//        } else if (IllageAndSpillageConfig.nightmare_mode.get() && entity instanceof FreakagerEntity) {
+//        } else if (Config.CommonConfig.nightmare_mode.get() && entity instanceof FreakagerEntity) {
 //            ItemStack head = new ItemStack(Items.NETHERITE_HELMET);
 //            head.enchant(Enchantments.PROJECTILE_PROTECTION, 7);
 //            head.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 2);
@@ -191,7 +191,7 @@ public class NightmareEvents {
 //            entity.setItemSlot(EquipmentSlot.CHEST, chest);
 //            entity.setItemSlot(EquipmentSlot.LEGS, legs);
 //            entity.setItemSlot(EquipmentSlot.FEET, feet);
-//        } else if (IllageAndSpillageConfig.nightmare_mode.get() && entity instanceof RagnoEntity) {
+//        } else if (Config.CommonConfig.nightmare_mode.get() && entity instanceof RagnoEntity) {
 //            ItemStack head = new ItemStack(Items.NETHERITE_HELMET);
 //            head.enchant(Enchantments.UNBREAKING, 255);
 //            head.enchant(Enchantments.VANISHING_CURSE, 1);
@@ -208,7 +208,7 @@ public class NightmareEvents {
 //            entity.setItemSlot(EquipmentSlot.CHEST, chest);
 //            entity.setItemSlot(EquipmentSlot.LEGS, legs);
 //            entity.setItemSlot(EquipmentSlot.FEET, feet);
-//        } else if (IllageAndSpillageConfig.nightmare_mode.get() && entity instanceof MagispellerEntity) {
+//        } else if (Config.CommonConfig.nightmare_mode.get() && entity instanceof MagispellerEntity) {
 //            ItemStack head = new ItemStack(Items.NETHERITE_HELMET);
 //            head.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 2);
 //            head.enchant(Enchantments.PROJECTILE_PROTECTION, 5);
@@ -234,7 +234,7 @@ public class NightmareEvents {
 //            entity.setItemSlot(EquipmentSlot.CHEST, chest);
 //            entity.setItemSlot(EquipmentSlot.LEGS, legs);
 //            entity.setItemSlot(EquipmentSlot.FEET, feet);
-//        } else if (IllageAndSpillageConfig.nightmare_mode.get() && entity instanceof DispenserEntity) {
+//        } else if (Config.CommonConfig.nightmare_mode.get() && entity instanceof DispenserEntity) {
 //            Objects.requireNonNull(((DispenserEntity) entity).getAttribute(Attributes.MAX_HEALTH)).setBaseValue(30.0);
 //            ((DispenserEntity) entity).heal(50);
 //        }

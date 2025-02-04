@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities.goal;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.MagispellerEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -18,7 +18,7 @@ public class StareAtDeadMagiGoal extends Goal {
     }
 
     public boolean canUse() {
-        return IllageAndSpillageConfig.magispeller_distractEnemies.get() && magiToStareAt != null && !magiToStareAt.isDead();
+        return Config.CommonConfig.magispeller_distractEnemies.get() && magiToStareAt != null && !magiToStareAt.isDead();
     }
 
     public boolean canContinueToUse() {

@@ -1,9 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
-import com.yellowbrossproductions.illageandspillage.packet.MobFollowingSoundPacket;
-import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.BlockPos;
@@ -38,7 +36,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
@@ -167,7 +164,7 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
 
     public void tick() {
         super.tick();
-        if (!IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get() && !this.hasAlreadyTriedSpawn()) {
+        if (!Config.CommonConfig.ULTIMATE_NIGHTMARE.get() && !this.hasAlreadyTriedSpawn()) {
             if (this.getPassengers().isEmpty()) {
                 this.spawnMob();
             }
@@ -307,7 +304,7 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
     }
 
     private void summonMobFromConfig(BlockPos blockPos) {
-        List<? extends String> mobSpawns = IllageAndSpillageConfig.crocofang_rideableMobs.get();
+        List<? extends String> mobSpawns = Config.CommonConfig.crocofang_rideableMobs.get();
         if (!mobSpawns.isEmpty()) {
             Collections.shuffle(mobSpawns);
             int randomIndex = this.getRandom().nextInt(mobSpawns.size());

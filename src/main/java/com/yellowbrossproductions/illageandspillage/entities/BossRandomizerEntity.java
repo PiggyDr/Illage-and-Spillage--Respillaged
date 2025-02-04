@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.IllageAndSpillage;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -74,7 +74,7 @@ public class BossRandomizerEntity extends AbstractIllager {
 
     public void tick() {
         super.tick();
-        if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && (Boolean) IllageAndSpillageConfig.bossrandomizer_onlyOneAllowed.get()) {
+        if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && Config.CommonConfig.bossrandomizer_onlyOneAllowed.get()) {
             this.getCurrentRaid().removeFromRaid(this, true);
             if (!this.level().isClientSide) {
                 this.remove(RemovalReason.DISCARDED);
@@ -83,13 +83,13 @@ public class BossRandomizerEntity extends AbstractIllager {
 
         if (this.tickCount >= 15 && this.getCurrentRaid() != null) {
             if (this.getCurrentRaid().getGroupsSpawned() <= 7) {
-                if (IllageAndSpillageConfig.bossrandomizer_broadcastBossSpawn.get()) {
+                if (Config.CommonConfig.bossrandomizer_broadcastBossSpawn.get()) {
                     this.playSound(IllageAndSpillageSoundEvents.ENTITY_BOSSRANDOMIZER_BOSS.get(), 15.0F, 1.0F);
                 }
 
                 this.spawnBoss();
             } else {
-                if (IllageAndSpillageConfig.bossrandomizer_broadcastBossSpawn.get()) {
+                if (Config.CommonConfig.bossrandomizer_broadcastBossSpawn.get()) {
                     LocalDate localdate = LocalDate.now();
                     int i = localdate.get(ChronoField.DAY_OF_MONTH);
                     int j = localdate.get(ChronoField.MONTH_OF_YEAR);
@@ -168,7 +168,7 @@ public class BossRandomizerEntity extends AbstractIllager {
     }
 
     private boolean summonMobFromConfig(BlockPos blockPos) {
-        List<? extends String> mobSpawns = IllageAndSpillageConfig.bossrandomizer_bosstypes.get();
+        List<? extends String> mobSpawns = Config.CommonConfig.bossrandomizer_bosstypes.get();
         if (mobSpawns.isEmpty()) {
             return false;
         } else {
@@ -200,7 +200,7 @@ public class BossRandomizerEntity extends AbstractIllager {
     }
 
     private boolean summonFinalBossFromConfig(BlockPos blockPos) {
-        List<? extends String> mobSpawns = IllageAndSpillageConfig.bossrandomizer_finalbosstypes.get();
+        List<? extends String> mobSpawns = Config.CommonConfig.bossrandomizer_finalbosstypes.get();
         if (mobSpawns.isEmpty()) {
             return false;
         } else {

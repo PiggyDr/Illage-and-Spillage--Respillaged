@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.mixin;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.util.ModTags;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
@@ -64,7 +64,7 @@ public abstract class RaidMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void tick(CallbackInfo ci) {
-        if (IllageAndSpillageConfig.bossbar_type.get() != 3 || this.isStopped() || this.isOver()) {
+        if (Config.CommonConfig.bossbar_type.get() != 3 || this.isStopped() || this.isOver()) {
             return;
         }
 
@@ -76,7 +76,7 @@ public abstract class RaidMixin {
                 this.onlyBosses = true;
                 this.previousTotalHealth = this.totalHealth;
                 this.oldNonBossUUIDs = nonBosses.stream().map(Raider::getUUID).collect(Collectors.toSet());
-                this.raidEvent.setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+                this.raidEvent.setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
             }
 
             this.totalHealth = this.getBossesMaxHealth(bosses);

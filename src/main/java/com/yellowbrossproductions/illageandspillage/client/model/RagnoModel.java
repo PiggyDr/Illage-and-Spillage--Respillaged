@@ -16,6 +16,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 
+import java.util.Calendar;
+
 public class RagnoModel<T extends Entity> extends HierarchicalModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(IllageAndSpillage.MOD_ID, "ragno"), "main");
     private final ModelPart root;
@@ -37,6 +39,12 @@ public class RagnoModel<T extends Entity> extends HierarchicalModel<T> {
         PartDefinition ragno_head = neck.addOrReplaceChild("ragno_head", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -20.0F, -14.0F, 16.0F, 20.0F, 16.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 8.0F, -11.0F, 0.2618F, 0.0F, 0.0F));
 
         ragno_head.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -1.0F, -3.0F, 4.0F, 8.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -5.0F, -15.0F, -0.0873F, 0.0F, 0.0F));
+
+        PartDefinition birthday = ragno_head.addOrReplaceChild("birthday", CubeListBuilder.create().texOffs(125, 85).addBox(-2.0F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(113, 85).addBox(-1.5F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(138, 82).addBox(0.0F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -12.6667F, -13.0833F, 0.0F, 0.0F, 0.1309F));
+
+        birthday.addOrReplaceChild("thingy", CubeListBuilder.create().texOffs(138, 85).addBox(-1.5F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition ragno_body = all.addOrReplaceChild("ragno_body", CubeListBuilder.create().texOffs(120, 0).addBox(-8.0F, -7.0F, -10.5F, 16.0F, 14.0F, 22.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1745F, 0.0F, 0.0F));
 
@@ -140,6 +148,9 @@ public class RagnoModel<T extends Entity> extends HierarchicalModel<T> {
             this.animate(ragno.getAnimationState("grab"), RagnoAnimation2.GRAB, ageInTicks, ragno.getAnimationSpeed());
             this.animate(ragno.getAnimationState("breath"), RagnoAnimation2.BREATH, ageInTicks, ragno.getAnimationSpeed());
             this.animate(ragno.getAnimationState("death"), RagnoAnimation2.DEATH, ageInTicks, ragno.getAnimationSpeed());
+
+            Calendar calendar = Calendar.getInstance();
+            head.getChild("birthday").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
 
             if (!ragno.isAlive()) {
                 this.all.yRot = (float) Math.toRadians(180);

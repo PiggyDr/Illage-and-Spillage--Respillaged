@@ -1,7 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities.goal;
 
-import com.yellowbrossproductions.illageandspillage.config.Config;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.FreakagerEntity;
 import com.yellowbrossproductions.illageandspillage.entities.SpiritcallerEntity;
 import net.minecraft.world.entity.Mob;
@@ -21,7 +20,7 @@ public class WatchBossIntroGoal extends Goal {
     }
 
     public boolean canUse() {
-        if (!IllageAndSpillageConfig.mobs_watch_intros.get() || affectedMob.getTarget() != bossToStareAt) return false;
+        if (!Config.CommonConfig.mobs_watch_intros.get() || affectedMob.getTarget() != bossToStareAt) return false;
         if (bossToStareAt instanceof SpiritcallerEntity) {
             return affectedMob.distanceToSqr(bossToStareAt) > 64 && ((SpiritcallerEntity) bossToStareAt).isRitual();
         } else if (bossToStareAt instanceof FreakagerEntity) {

@@ -2,7 +2,7 @@ package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.client.sound.BossMusicPlayer;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.goal.WatchBossIntroGoal;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.*;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
@@ -114,8 +114,10 @@ public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
     public FreakagerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 20;
-        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
         bossEvent.setVisible(false);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.CommonConfig.freakager_health.get());
+        this.heal(Float.MAX_VALUE);
     }
 
     @Override
@@ -166,7 +168,7 @@ public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.freakager_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 1).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 50.0);
     }
 
     protected void defineSynchedData() {
@@ -251,7 +253,7 @@ public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
 
     public void tick() {
         List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
-        if (IllageAndSpillageConfig.freakager_forcefield.get() && this.hasActiveRaid()) {
+        if (Config.CommonConfig.freakager_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
             }
@@ -262,7 +264,7 @@ public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
         }
 
         if (this.hasActiveRaid()) {
-            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && IllageAndSpillageConfig.freakager_onlyOneAllowed.get()) {
+            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && Config.CommonConfig.freakager_onlyOneAllowed.get()) {
                 this.getCurrentRaid().removeFromRaid(this, true);
                 if (!this.level().isClientSide) {
                     this.remove(RemovalReason.DISCARDED);
@@ -308,7 +310,7 @@ public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
                 this.setAnimationState(9);
                 this.setLeftHanded(false);
                 setShowArms(true);
-                if (IllageAndSpillageConfig.mobs_watch_intros.get()) {
+                if (Config.CommonConfig.mobs_watch_intros.get()) {
                     List<Mob> list1 = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(50.0));
                     for (Mob mob : list1) {
                         mob.goalSelector.addGoal(0, new WatchBossIntroGoal(mob, this));
@@ -1544,7 +1546,7 @@ public class FreakagerEntity extends AbstractIllager implements ICanBeAnimated {
     }
 
     public boolean isPersistenceRequired() {
-        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
+        return !Config.CommonConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     public boolean isPickable() {

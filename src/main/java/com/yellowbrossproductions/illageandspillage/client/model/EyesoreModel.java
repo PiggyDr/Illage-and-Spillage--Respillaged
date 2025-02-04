@@ -12,6 +12,8 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
+import java.util.Calendar;
+
 public class EyesoreModel<T extends Entity> extends HierarchicalModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("illageandspillage", "eyesore"), "main");
     private final ModelPart root;
@@ -52,6 +54,12 @@ public class EyesoreModel<T extends Entity> extends HierarchicalModel<T> {
 
         tendon4.addOrReplaceChild("cube_r4", CubeListBuilder.create().texOffs(37, -11).addBox(0.0F, -5.5F, -5.5F, 0.0F, 11.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5F, 0.25F, 6.0F, -1.5708F, 0.0F, -3.1416F));
 
+        PartDefinition birthday = eye.addOrReplaceChild("birthday", CubeListBuilder.create().texOffs(80, 21).addBox(-2.0F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(68, 21).addBox(-1.5F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(93, 18).addBox(0.0F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.6667F, -10.0833F, -0.0873F, 0.0F, 0.0F));
+
+        birthday.addOrReplaceChild("thingy", CubeListBuilder.create().texOffs(93, 21).addBox(-1.5F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
         return LayerDefinition.create(meshdefinition, 128, 128);
     }
 
@@ -59,6 +67,8 @@ public class EyesoreModel<T extends Entity> extends HierarchicalModel<T> {
     public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
         if (entity instanceof EyesoreEntity eyesore) {
+            Calendar calendar = Calendar.getInstance();
+            this.eye.getChild("birthday").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
             this.animate(eyesore.getAnimationState("slither"), EyesoreAnimation.SLITHER, ageInTicks, eyesore.getAnimationSpeed());
             this.animate(eyesore.getAnimationState("fly"), EyesoreAnimation.FLY, ageInTicks, eyesore.getAnimationSpeed());
         }

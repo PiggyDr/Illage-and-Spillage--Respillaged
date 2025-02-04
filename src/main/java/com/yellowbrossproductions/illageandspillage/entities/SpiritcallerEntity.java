@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.sound.BossMusicPlayer;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.goal.WatchBossIntroGoal;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.SoulBeamEntity;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
@@ -120,6 +120,8 @@ public class SpiritcallerEntity extends AbstractIllager {
         this.xpReward = 50;
         bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
         bossEvent.setVisible(false);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.CommonConfig.spiritcaller_health.get());
+        this.heal(Float.MAX_VALUE);
     }
 
     @Override
@@ -160,7 +162,7 @@ public class SpiritcallerEntity extends AbstractIllager {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.spiritcaller_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 1).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
     }
 
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
@@ -368,7 +370,7 @@ public class SpiritcallerEntity extends AbstractIllager {
 
         this.updateMobList();
         List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
-        if (IllageAndSpillageConfig.spiritcaller_forcefield.get() && this.hasActiveRaid()) {
+        if (Config.CommonConfig.spiritcaller_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
             }
@@ -379,7 +381,7 @@ public class SpiritcallerEntity extends AbstractIllager {
         }
 
         if (this.hasActiveRaid()) {
-            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && IllageAndSpillageConfig.spiritcaller_onlyOneAllowed.get()) {
+            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && Config.CommonConfig.spiritcaller_onlyOneAllowed.get()) {
                 this.getCurrentRaid().removeFromRaid(this, true);
                 if (!this.level().isClientSide) {
                     this.remove(RemovalReason.DISCARDED);
@@ -396,7 +398,7 @@ public class SpiritcallerEntity extends AbstractIllager {
         if (this.ritualTicks > 0 && !this.isActive() && this.isAlive()) {
             ++this.ritualTicks;
             if (this.ritualTicks == 30) {
-                if (IllageAndSpillageConfig.mobs_watch_intros.get()) {
+                if (Config.CommonConfig.mobs_watch_intros.get()) {
                     List<Mob> list1 = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(50.0));
                     for (Mob mob : list1) {
                         mob.goalSelector.addGoal(0, new WatchBossIntroGoal(mob, this));
@@ -1008,7 +1010,7 @@ public class SpiritcallerEntity extends AbstractIllager {
     }
 
     public boolean canStolenMobBeAttacked(LivingEntity entity, LivingEntity attacker) {
-        if (IllageAndSpillageConfig.spiritcaller_wontAttack.get().contains(entity.getEncodeId())) {
+        if (Config.CommonConfig.spiritcaller_wontAttack.get().contains(entity.getEncodeId())) {
             return false;
         } else if (entity.getTeam() != null) {
             return entity.getTeam().isAllowFriendlyFire();
@@ -1345,7 +1347,7 @@ public class SpiritcallerEntity extends AbstractIllager {
     }
 
     public boolean isPersistenceRequired() {
-        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
+        return !Config.CommonConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     @Nullable
@@ -1382,7 +1384,7 @@ public class SpiritcallerEntity extends AbstractIllager {
     }
 
     public boolean areStealableMobsNearby() {
-        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(15.0), (predicate) -> IllageAndSpillageConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate != this);
+        List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(15.0), (predicate) -> Config.CommonConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate != this);
         return !list.isEmpty();
     }
 
@@ -1391,7 +1393,7 @@ public class SpiritcallerEntity extends AbstractIllager {
     }
 
     public boolean areStolenMobsNearby() {
-        List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(100.0), (predicate) -> IllageAndSpillageConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate.hasEffect(EffectRegisterer.DISABILITY.get()));
+        List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(100.0), (predicate) -> Config.CommonConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate.hasEffect(EffectRegisterer.DISABILITY.get()));
         return !list.isEmpty();
     }
 
@@ -1477,7 +1479,7 @@ public class SpiritcallerEntity extends AbstractIllager {
             EntityUtil.mobFollowingSound(level(), SpiritcallerEntity.this, IllageAndSpillageSoundEvents.ENTITY_SPIRITCALLER_STEALSPIRITS.get(), 2.0F, 1.0F, false);
             SpiritcallerEntity.this.setArmsUpward(true);
             SpiritcallerEntity.this.attackType = SpiritcallerEntity.this.SPIRIT_STEAL;
-            List<Mob> stealingMobs = SpiritcallerEntity.this.level().getEntitiesOfClass(Mob.class, SpiritcallerEntity.this.getBoundingBox().inflate(15.0), (predicate) -> IllageAndSpillageConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate != SpiritcallerEntity.this);
+            List<Mob> stealingMobs = SpiritcallerEntity.this.level().getEntitiesOfClass(Mob.class, SpiritcallerEntity.this.getBoundingBox().inflate(15.0), (predicate) -> Config.CommonConfig.spiritcaller_stealableMobs.get().contains(predicate.getEncodeId()) && !predicate.isInvulnerable() && predicate != SpiritcallerEntity.this);
             if (!stealingMobs.isEmpty()) {
                 for (int i = 0; i < stealingMobs.size(); ++i) {
                     LivingEntity mob = stealingMobs.get(i);

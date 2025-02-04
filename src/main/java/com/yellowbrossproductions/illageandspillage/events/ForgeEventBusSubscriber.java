@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.events;
 
 import com.yellowbrossproductions.illageandspillage.IllageAndSpillage;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.goal.LoseAIGoal;
 import com.yellowbrossproductions.illageandspillage.entities.goal.RunFromIntroBossGoal;
@@ -94,7 +94,7 @@ public class ForgeEventBusSubscriber {
             ((Mob) entity).goalSelector.addGoal(0, new LoseAIGoal((Mob) entity));
         }
 
-        if (entity instanceof PathfinderMob && IllageAndSpillageConfig.mobs_watch_intros.get()) {
+        if (entity instanceof PathfinderMob && Config.CommonConfig.mobs_watch_intros.get()) {
             ((PathfinderMob) entity).goalSelector.addGoal(0, new RunFromIntroBossGoal((PathfinderMob) entity, SpiritcallerEntity.class, 8.0F, 1.0F, 1.0F));
             ((PathfinderMob) entity).goalSelector.addGoal(0, new RunFromIntroBossGoal((PathfinderMob) entity, FreakagerEntity.class, 8.0F, 1.0F, 1.0F));
         }

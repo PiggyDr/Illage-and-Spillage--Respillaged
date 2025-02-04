@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.nbt.CompoundTag;
@@ -147,7 +147,7 @@ public class AbsorberEntity extends AbstractIllager implements ICanBeAnimated {
     }
 
     public boolean hurt(DamageSource source, float p_37850_) {
-        if (!(Boolean) IllageAndSpillageConfig.absorber_damageMode.get()) {
+        if (!(Boolean) Config.CommonConfig.absorber_damageMode.get()) {
             if (!source.is(DamageTypes.FELL_OUT_OF_WORLD) && !source.is(DamageTypes.GENERIC_KILL)) {
                 p_37850_ = 1.0F;
             }

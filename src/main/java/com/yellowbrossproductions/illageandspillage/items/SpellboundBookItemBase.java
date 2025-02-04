@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.items;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.util.EffectRegisterer;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.client.Minecraft;
@@ -40,8 +40,8 @@ public class SpellboundBookItemBase extends Item {
         if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340)) {
             tooltip.add(Component.translatable("tooltip.illageandspillage.shift"));
         } else {
-            if (IllageAndSpillageConfig.spellboundbook_rechargeTime.get() > 0) {
-                tooltip.add(Component.translatable("tooltip.illageandspillage.spellbound_book_1").append((IllageAndSpillageConfig.spellboundbook_rechargeTime.get()).toString()).append(Component.translatable("tooltip.illageandspillage.spellbound_book_1_minutes")));
+            if (Config.CommonConfig.spellboundbook_rechargeTime.get() > 0) {
+                tooltip.add(Component.translatable("tooltip.illageandspillage.spellbound_book_1").append((Config.CommonConfig.spellboundbook_rechargeTime.get()).toString()).append(Component.translatable("tooltip.illageandspillage.spellbound_book_1_minutes")));
                 tooltip.add(Component.translatable("tooltip.illageandspillage.spellbound_book_2"));
                 tooltip.add(Component.translatable("tooltip.illageandspillage.spellbound_book_3"));
             }
@@ -87,11 +87,11 @@ public class SpellboundBookItemBase extends Item {
     }
 
     public boolean canBeDepleted() {
-        return IllageAndSpillageConfig.spellboundbook_rechargeTime.get() > 0;
+        return Config.CommonConfig.spellboundbook_rechargeTime.get() > 0;
     }
 
     public int getMaxDamage(ItemStack stack) {
-        return IllageAndSpillageConfig.spellboundbook_rechargeTime.get() * 1200;
+        return Config.CommonConfig.spellboundbook_rechargeTime.get() * 1200;
     }
 
     public boolean isEnchantable(ItemStack p_41456_) {
@@ -114,7 +114,7 @@ public class SpellboundBookItemBase extends Item {
             worldIn.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 2.0F, 0.8F);
             worldIn.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 2.0F, 0.8F);
             worldIn.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 10000.0F, 0.8F);
-            player.addEffect(new MobEffectInstance(EffectRegisterer.MISCONDUCTION.get(), IllageAndSpillageConfig.spellboundbook_effectTime.get() * 1200, 0, true, false));
+            player.addEffect(new MobEffectInstance(EffectRegisterer.MISCONDUCTION.get(), Config.CommonConfig.spellboundbook_effectTime.get() * 1200, 0, true, false));
             if (!player.getAbilities().instabuild) {
                 this.setDamage(stack, 72000);
             }

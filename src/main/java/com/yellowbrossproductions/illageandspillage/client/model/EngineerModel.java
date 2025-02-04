@@ -13,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
+import java.util.Calendar;
+
 public class EngineerModel<T extends Entity> extends HierarchicalModel<T> implements CustomHeadedModel {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("illageandspillage", "engineer"), "main");
     private final ModelPart root;
@@ -53,9 +55,15 @@ public class EngineerModel<T extends Entity> extends HierarchicalModel<T> implem
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 0).addBox(-1.0F, -3.0F, -6.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -12.0F, 0.0F));
 
-        head.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.25F))
+        PartDefinition hat = head.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.25F))
                 .texOffs(64, 0).addBox(-5.0F, -7.0F, -5.0F, 10.0F, 1.0F, 10.0F, new CubeDeformation(0.0F))
                 .texOffs(28, 18).addBox(-1.0F, -11.0F, -5.0F, 2.0F, 4.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition birthday = hat.addOrReplaceChild("birthday", CubeListBuilder.create().texOffs(45, 46).addBox(-2.0F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(33, 46).addBox(-1.5F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(58, 43).addBox(0.0F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.6667F, -8.0833F, 0.0F, 0.0F, 0.0873F));
+
+        birthday.addOrReplaceChild("thingy", CubeListBuilder.create().texOffs(58, 46).addBox(-1.5F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         all.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 36).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(2.0F, -12.0F, 0.0F));
 
@@ -70,6 +78,9 @@ public class EngineerModel<T extends Entity> extends HierarchicalModel<T> implem
         if (entity instanceof EngineerEntity engineer) {
             this.animate(engineer.getAnimationState("throw"), EngineerAnimation.THROW, ageInTicks, engineer.getAnimationSpeed());
             this.animate(engineer.getAnimationState("repair"), EngineerAnimation.REPAIR, ageInTicks, engineer.getAnimationSpeed());
+
+            Calendar calendar = Calendar.getInstance();
+            this.body.getChild("head").getChild("hat").getChild("birthday").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
 
             this.head.yRot = netHeadYaw * ((float) Math.PI / 180F);
             this.head.xRot = headPitch * ((float) Math.PI / 180F);

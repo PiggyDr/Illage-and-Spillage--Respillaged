@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.client.sound;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvent;
@@ -17,7 +17,7 @@ public class BossMusicPlayer {
     public static BossMusicSound bossMusic;
 
     public static void playBossMusic(Raider entity) {
-        if (IllageAndSpillageConfig.boss_music.get()) {
+        if (Config.CommonConfig.boss_music.get()) {
             if (entity instanceof SpiritcallerEntity) {
                 doSpiritcallerMusic((SpiritcallerEntity) entity);
             } else if (entity instanceof FreakagerEntity) {
@@ -173,7 +173,7 @@ public class BossMusicPlayer {
     }
 
     public static void stopBossMusic(Raider entity) {
-        if (IllageAndSpillageConfig.boss_music.get()) {
+        if (Config.CommonConfig.boss_music.get()) {
             if (bossMusic != null && bossMusic.getBoss() == entity) {
                 bossMusic.setBoss(null);
             }

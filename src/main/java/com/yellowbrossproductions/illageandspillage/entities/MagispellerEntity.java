@@ -2,7 +2,7 @@ package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.client.sound.BossMusicPlayer;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.goal.MeleeButStopGoal;
 import com.yellowbrossproductions.illageandspillage.entities.goal.StareAtDeadMagiGoal;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.MagiArrowEntity;
@@ -143,8 +143,10 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
     public MagispellerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 100;
-        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
         bossEvent.setVisible(false);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.CommonConfig.magispeller_health.get());
+        this.heal(Float.MAX_VALUE);
     }
 
     @Override
@@ -187,7 +189,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, IllageAndSpillageConfig.magispeller_health.get()).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.3499999940395355).add(Attributes.MAX_HEALTH, 1).add(Attributes.ATTACK_DAMAGE, 5.0).add(Attributes.FOLLOW_RANGE, 96.0);
     }
 
     protected void customServerAiStep() {
@@ -344,7 +346,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
 
     public void tick() {
         List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
-        if (IllageAndSpillageConfig.magispeller_forcefield.get() && this.hasActiveRaid()) {
+        if (Config.CommonConfig.magispeller_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
             }
@@ -355,7 +357,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
         }
 
         if (this.hasActiveRaid()) {
-            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && IllageAndSpillageConfig.magispeller_onlyOneAllowed.get()) {
+            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && Config.CommonConfig.magispeller_onlyOneAllowed.get()) {
                 this.getCurrentRaid().removeFromRaid(this, true);
                 if (!this.level().isClientSide) {
                     this.remove(RemovalReason.DISCARDED);
@@ -560,7 +562,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
                                     float healthStolen = ((((LivingEntity) entity1).getMaxHealth() - ((LivingEntity) entity1).getHealth()) / 3.0F + 1.0F);
                                     healthStolen = Math.min(healthStolen, 10);
 
-                                    healthStolen = IllageAndSpillageConfig.nightmare_mode.get() ? (float) (healthStolen * IllageAndSpillageConfig.magi_damage_multiplier.get()) : healthStolen;
+                                    healthStolen = Config.CommonConfig.nightmare_mode.get() ? (float) (healthStolen * Config.CommonConfig.magi_damage_multiplier.get()) : healthStolen;
 
                                     this.heal(healthStolen);
                                     entity1.hurt(this.damageSources().indirectMagic(this, this), healthStolen);
@@ -895,7 +897,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
             this.setDeltaMovement(this.getDeltaMovement().subtract(-x / z * 0.06, 0.0, -y / z * 0.06));
         }
 
-        if (this.fallDistance > 5.0F && this.balloonCooldown < 1 && (this.getAttackType() == 0 || this.getAttackType() == this.HEAL_ATTACK) && this.isActive() && IllageAndSpillageConfig.magispeller_balloonAllowed.get() && this.isAlive()) {
+        if (this.fallDistance > 5.0F && this.balloonCooldown < 1 && (this.getAttackType() == 0 || this.getAttackType() == this.HEAL_ATTACK) && this.isActive() && Config.CommonConfig.magispeller_balloonAllowed.get() && this.isAlive()) {
             this.playSound(SoundEvents.SNOWBALL_THROW, 3.0F, 0.5F);
             if (!this.level().isClientSide) {
                 this.setShowArms(true);
@@ -1620,7 +1622,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
             }
 
             if (this.customDeathTime == 80) {
-                if (IllageAndSpillageConfig.magispeller_distractEnemies.get()) {
+                if (Config.CommonConfig.magispeller_distractEnemies.get()) {
                     List<Mob> list = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(50.0));
                     for (Mob mob : list) {
                         mob.goalSelector.addGoal(0, new StareAtDeadMagiGoal(mob, this));
@@ -1900,7 +1902,7 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
     }
 
     public boolean isPersistenceRequired() {
-        return !IllageAndSpillageConfig.ULTIMATE_NIGHTMARE.get();
+        return !Config.CommonConfig.ULTIMATE_NIGHTMARE.get();
     }
 
     public boolean canBeAffected(MobEffectInstance p_70687_1_) {

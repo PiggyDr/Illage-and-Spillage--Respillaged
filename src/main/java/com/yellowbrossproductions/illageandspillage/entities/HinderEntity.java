@@ -6,7 +6,6 @@ import com.yellowbrossproductions.illageandspillage.packet.ParticlePacket;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -41,7 +40,7 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.0).add(Attributes.MAX_HEALTH, 40.0);
+        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.0).add(Attributes.MAX_HEALTH, 40.0).add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 
     public void setAnimationState(int state) {
@@ -161,10 +160,6 @@ public class HinderEntity extends Raider implements ICanBeAnimated, EngineerMach
     private void stopAllAnimationStates() {
         introAnimationState.stop();
         idleAnimationState.stop();
-    }
-
-    @Override
-    public void knockback(double p_147241_, double p_147242_, double p_147243_) {
     }
 
     public void makeParticleTrail(double srcX, double srcY, double srcZ, double destX, double destY, double destZ) {

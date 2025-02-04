@@ -2,7 +2,7 @@ package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
 import com.yellowbrossproductions.illageandspillage.client.sound.BossMusicPlayer;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.goal.WatchBossIntroGoal;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.*;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
@@ -95,7 +95,7 @@ public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimate
     public OldFreakagerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 20;
-        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
         bossEvent.setVisible(false);
     }
 
@@ -197,7 +197,7 @@ public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimate
 
     public void tick() {
         List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
-        if (IllageAndSpillageConfig.freakager_forcefield.get() && this.hasActiveRaid()) {
+        if (Config.CommonConfig.freakager_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
             }
@@ -208,7 +208,7 @@ public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimate
         }
 
         if (this.hasActiveRaid()) {
-            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && IllageAndSpillageConfig.freakager_onlyOneAllowed.get()) {
+            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && Config.CommonConfig.freakager_onlyOneAllowed.get()) {
                 this.getCurrentRaid().removeFromRaid(this, true);
                 if (!this.level().isClientSide) {
                     this.remove(RemovalReason.DISCARDED);
@@ -243,7 +243,7 @@ public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimate
                 this.yBodyRot = this.getYRot();
             }
 
-            if (this.introTicks == 21 && IllageAndSpillageConfig.mobs_watch_intros.get()) {
+            if (this.introTicks == 21 && Config.CommonConfig.mobs_watch_intros.get()) {
                 List<Mob> list1 = this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(50.0));
                 for (Mob mob : list1) {
                     mob.goalSelector.addGoal(0, new WatchBossIntroGoal(mob, this));

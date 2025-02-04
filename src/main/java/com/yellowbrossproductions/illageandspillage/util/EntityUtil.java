@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.util;
 
 import com.yellowbrossproductions.illageandspillage.access.LivingEntityAccess;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.*;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.AxeEntity;
 import com.yellowbrossproductions.illageandspillage.entities.projectile.BoneEntity;
@@ -36,11 +36,11 @@ import java.util.List;
 
 public class EntityUtil {
     public static boolean displayBossBar(Raider boss) {
-        if (IllageAndSpillageConfig.bossbar_type.get() == 1) {
+        if (Config.CommonConfig.bossbar_type.get() == 1) {
             return !boss.hasActiveRaid();
         }
 
-        return IllageAndSpillageConfig.bossbar_type.get() == 2;
+        return Config.CommonConfig.bossbar_type.get() == 2;
     }
 
     public static boolean isEntityCrazyRagno(Entity entity) {

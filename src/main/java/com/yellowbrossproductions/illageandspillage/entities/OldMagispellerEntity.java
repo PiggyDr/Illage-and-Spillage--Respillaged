@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.util.EntityUtil;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
@@ -92,7 +92,7 @@ public class OldMagispellerEntity extends AbstractIllager {
     public OldMagispellerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
         this.xpReward = 100;
-        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(IllageAndSpillageConfig.bosses_darken_sky.get());
+        bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(Config.CommonConfig.bosses_darken_sky.get());
         bossEvent.setVisible(false);
     }
 
@@ -198,7 +198,7 @@ public class OldMagispellerEntity extends AbstractIllager {
 
     public void tick() {
         List<Raider> list = this.level().getEntitiesOfClass(Raider.class, this.getBoundingBox().inflate(100.0), (predicate) -> predicate.hasActiveRaid() && !predicate.getType().is(ModTags.EntityTypes.ILLAGER_BOSSES));
-        if (IllageAndSpillageConfig.magispeller_forcefield.get() && this.hasActiveRaid()) {
+        if (Config.CommonConfig.magispeller_forcefield.get() && this.hasActiveRaid()) {
             if (!this.level().isClientSide) {
                 this.setIllagersNearby(!list.isEmpty());
             }
@@ -209,7 +209,7 @@ public class OldMagispellerEntity extends AbstractIllager {
         }
 
         if (this.hasActiveRaid()) {
-            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && IllageAndSpillageConfig.magispeller_onlyOneAllowed.get()) {
+            if (this.getCurrentRaid() != null && this.getCurrentRaid().getGroupsSpawned() == 7 && this.shouldRemoveItself() && Config.CommonConfig.magispeller_onlyOneAllowed.get()) {
                 this.getCurrentRaid().removeFromRaid(this, true);
                 if (!this.level().isClientSide) {
                     this.remove(RemovalReason.DISCARDED);

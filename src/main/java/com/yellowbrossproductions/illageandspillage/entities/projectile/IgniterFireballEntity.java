@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities.projectile;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,7 +27,7 @@ public class IgniterFireballEntity extends SmallFireball {
     protected void onHitBlock(BlockHitResult p_37384_) {
         BlockState blockstate = this.level().getBlockState(p_37384_.getBlockPos());
         blockstate.onProjectileHit(this.level(), blockstate, p_37384_, this);
-        if (IllageAndSpillageConfig.igniter_canBurnBlocks.get() && !this.level().isClientSide && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
+        if (Config.CommonConfig.igniter_canBurnBlocks.get() && !this.level().isClientSide && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
             BlockPos blockpos = p_37384_.getBlockPos().relative(p_37384_.getDirection());
             if (this.level().isEmptyBlock(blockpos)) {
                 this.level().setBlockAndUpdate(blockpos, BaseFireBlock.getState(this.level(), blockpos));

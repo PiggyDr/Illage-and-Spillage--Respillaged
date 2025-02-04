@@ -33,7 +33,11 @@ public class BagOfHorrorsItemBase extends Item {
 
                 s1.setPos(player.getX(), player.getY() + 0.25, player.getZ());
                 s1.setOwner(player);
-                s1.setTarget(level.getNearestEntity(Monster.class, TargetingConditions.DEFAULT, player, player.getX(), player.getY(), player.getZ(), player.getBoundingBox().inflate(40.0)));
+                if (player.getLastHurtByMob() != null && player.getLastHurtByMob().isAlive() && !player.getLastHurtByMob().isRemoved()) {
+                    s1.setTarget(player.getLastHurtByMob());
+                } else {
+                    s1.setTarget(level.getNearestEntity(Monster.class, TargetingConditions.DEFAULT, player, player.getX(), player.getY(), player.getZ(), player.getBoundingBox().inflate(40.0)));
+                }
                 if (i == 0) {
                     s1.setDeltaMovement(-throwSpeed, 0.3, -throwSpeed);
                 } else if (i == 1) {

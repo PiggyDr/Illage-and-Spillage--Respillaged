@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
 import com.yellowbrossproductions.illageandspillage.client.model.animation.ICanBeAnimated;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -26,7 +26,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,7 +41,6 @@ public class EngineerEntity extends AbstractIllager implements ICanBeAnimated {
     private Monster toRepair;
     private final int THROW_ATTACK = 1;
     private final int REPAIR_ATTACK = 2;
-    private final List<Raider> machines = new ArrayList<>();
 
     public EngineerEntity(EntityType<? extends AbstractIllager> p_32105_, Level p_32106_) {
         super(p_32105_, p_32106_);
@@ -151,7 +149,7 @@ public class EngineerEntity extends AbstractIllager implements ICanBeAnimated {
     public void tick() {
         super.tick();
 
-        if (this.attackType < 1 && (IllageAndSpillageConfig.engineer_machine_limit.get() < 0 || this.getMachines().size() < IllageAndSpillageConfig.engineer_machine_limit.get())) {
+        if (this.attackType < 1 && (Config.CommonConfig.engineer_machine_limit.get() < 0 || this.getMachines().size() < Config.CommonConfig.engineer_machine_limit.get())) {
             --this.throwCooldown;
         }
 
@@ -235,7 +233,7 @@ public class EngineerEntity extends AbstractIllager implements ICanBeAnimated {
     class ThrowMachineGoal extends Goal {
         @Override
         public boolean canUse() {
-            return EngineerEntity.this.attackType == 0 && EngineerEntity.this.getTarget() != null && EngineerEntity.this.throwCooldown < 1 && (IllageAndSpillageConfig.engineer_machine_limit.get() < 0 || EngineerEntity.this.getMachines().size() < IllageAndSpillageConfig.engineer_machine_limit.get());
+            return EngineerEntity.this.attackType == 0 && EngineerEntity.this.getTarget() != null && EngineerEntity.this.throwCooldown < 1 && (Config.CommonConfig.engineer_machine_limit.get() < 0 || EngineerEntity.this.getMachines().size() < Config.CommonConfig.engineer_machine_limit.get());
         }
 
         @Override

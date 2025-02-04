@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.init;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raid.RaiderType;
@@ -25,18 +25,18 @@ public class RaidWaveMembers {
     public static Raid.RaiderType OLD_MAGISPELLER;
 
     public static void registerWaveMembers() {
-        BOSS_RANDOMIZER = translateToWaves(ModEntityTypes.BossRandomizer.get(), IllageAndSpillageConfig.bossrandomizer_raidcount.get());
-        IGNITER = translateToWaves(ModEntityTypes.Igniter.get(), IllageAndSpillageConfig.igniter_raidcount.get());
-        ENGINEER = translateToWaves(ModEntityTypes.Engineer.get(), IllageAndSpillageConfig.engineer_raidcount.get());
-        TWITTOLLAGER = translateToWaves(ModEntityTypes.Twittollager.get(), IllageAndSpillageConfig.twittollager_raidcount.get());
-        MAGISPELLER = translateToWaves(ModEntityTypes.Magispeller.get(), IllageAndSpillageConfig.magispeller_raidcount.get());
-        SPIRITCALLER = translateToWaves(ModEntityTypes.Spiritcaller.get(), IllageAndSpillageConfig.spiritcaller_raidcount.get());
-        CROCOFANG = translateToWaves(ModEntityTypes.Crocofang.get(), IllageAndSpillageConfig.crocofang_raidcount.get());
-        ABSORBER = translateToWaves(ModEntityTypes.Absorber.get(), IllageAndSpillageConfig.absorber_raidcount.get());
-        PRESERVER = translateToWaves(ModEntityTypes.Preserver.get(), IllageAndSpillageConfig.preserver_raidcount.get());
-        FREAKAGER = translateToWaves(ModEntityTypes.Freakager.get(), IllageAndSpillageConfig.freakager_raidcount.get());
-        OLD_FREAKAGER = translateToWaves(ModEntityTypes.OldFreakager.get(), IllageAndSpillageConfig.old_freakager_raidcount.get());
-        OLD_MAGISPELLER = translateToWaves(ModEntityTypes.OldMagispeller.get(), IllageAndSpillageConfig.old_magispeller_raidcount.get());
+        BOSS_RANDOMIZER = translateToWaves(ModEntityTypes.BossRandomizer.get(), Config.CommonConfig.bossrandomizer_raidcount.get());
+        IGNITER = translateToWaves(ModEntityTypes.Igniter.get(), Config.CommonConfig.igniter_raidcount.get());
+        ENGINEER = translateToWaves(ModEntityTypes.Engineer.get(), Config.CommonConfig.engineer_raidcount.get());
+        TWITTOLLAGER = translateToWaves(ModEntityTypes.Twittollager.get(), Config.CommonConfig.twittollager_raidcount.get());
+        MAGISPELLER = translateToWaves(ModEntityTypes.Magispeller.get(), Config.CommonConfig.magispeller_raidcount.get());
+        SPIRITCALLER = translateToWaves(ModEntityTypes.Spiritcaller.get(), Config.CommonConfig.spiritcaller_raidcount.get());
+        CROCOFANG = translateToWaves(ModEntityTypes.Crocofang.get(), Config.CommonConfig.crocofang_raidcount.get());
+        ABSORBER = translateToWaves(ModEntityTypes.Absorber.get(), Config.CommonConfig.absorber_raidcount.get());
+        PRESERVER = translateToWaves(ModEntityTypes.Preserver.get(), Config.CommonConfig.preserver_raidcount.get());
+        FREAKAGER = translateToWaves(ModEntityTypes.Freakager.get(), Config.CommonConfig.freakager_raidcount.get());
+        OLD_FREAKAGER = translateToWaves(ModEntityTypes.OldFreakager.get(), Config.CommonConfig.old_freakager_raidcount.get());
+        OLD_MAGISPELLER = translateToWaves(ModEntityTypes.OldMagispeller.get(), Config.CommonConfig.old_magispeller_raidcount.get());
     }
 
     private static Raid.RaiderType translateToWaves(EntityType<? extends Raider> type, List<? extends Integer> list) {

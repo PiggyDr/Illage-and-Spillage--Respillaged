@@ -13,6 +13,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 
+import java.util.Calendar;
+
 public class PokerModel<T extends Entity> extends HierarchicalModel<T> implements ArmedModel {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("illageandspillage", "poker"), "main");
     private final ModelPart root;
@@ -48,6 +50,12 @@ public class PokerModel<T extends Entity> extends HierarchicalModel<T> implement
 
         head.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 5).addBox(0.0F, -7.3F, -9.7F, 0.0F, 7.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -8.5F, 7.0F, 0.7854F, 0.0F, 0.0F));
 
+        PartDefinition birthday = head.addOrReplaceChild("birthday", CubeListBuilder.create().texOffs(12, 32).addBox(-1.5F, -9.3333F, 6.0833F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 32).addBox(-1.0F, -12.3333F, 6.5833F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(25, 29).addBox(0.5F, -15.3333F, 6.5833F, 0.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5F, -0.6667F, -8.0833F, -0.0873F, 0.0F, 0.0F));
+
+        birthday.addOrReplaceChild("thingy", CubeListBuilder.create().texOffs(25, 32).addBox(-1.0F, -15.3333F, 8.0F, 3.0F, 3.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
         body.addOrReplaceChild("arm2", CubeListBuilder.create().texOffs(20, 0).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.0F, -4.0F, 0.0F, -0.01F, 0.0082F, 0.0182F));
 
         body.addOrReplaceChild("arm1", CubeListBuilder.create().texOffs(8, 19).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-3.0F, -4.0F, 0.0F, 0.0143F, 0.0271F, 0.0074F));
@@ -56,11 +64,14 @@ public class PokerModel<T extends Entity> extends HierarchicalModel<T> implement
 
         all.addOrReplaceChild("leg1", CubeListBuilder.create().texOffs(0, 19).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-1.5F, -6.0F, 0.0F));
 
-        return LayerDefinition.create(meshdefinition, 32, 32);
+        return LayerDefinition.create(meshdefinition, 32, 40);
     }
 
     @Override
     public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        Calendar calendar = Calendar.getInstance();
+        this.head.getChild("birthday").visible = calendar.get(Calendar.MONTH) == Calendar.FEBRUARY && calendar.get(Calendar.DAY_OF_MONTH) < 8;
+
         this.head.yRot = netHeadYaw * 0.017453292F;
         this.head.xRot = headPitch * 0.017453292F;
         this.leg1.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount * 0.5F;

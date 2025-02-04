@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities.goal;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.HinderEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.raid.Raider;
@@ -21,7 +21,7 @@ public class RunToHinderGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        boolean initialConditions = !IllageAndSpillageConfig.hinder_excluded.get().contains(this.raider.getEncodeId()) && raider.hasActiveRaid() && raider.getHealth() <= raider.getMaxHealth() / 2;
+        boolean initialConditions = !Config.CommonConfig.hinder_excluded.get().contains(this.raider.getEncodeId()) && raider.hasActiveRaid() && raider.getHealth() <= raider.getMaxHealth() / 2;
         if (!initialConditions) return false;
 
         List<HinderEntity> list2 = raider.level().getEntitiesOfClass(HinderEntity.class, raider.getBoundingBox().inflate(21.0));

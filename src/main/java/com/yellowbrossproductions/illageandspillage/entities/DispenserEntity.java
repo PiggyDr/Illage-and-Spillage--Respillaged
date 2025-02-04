@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.util.IllageAndSpillageSoundEvents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -71,7 +71,7 @@ public class DispenserEntity extends Monster implements IllagerAttack {
                         illashooter.setTarget(this.getOwner().getTarget());
                     }
 
-                    if (IllageAndSpillageConfig.nightmare_mode.get()) {
+                    if (Config.CommonConfig.nightmare_mode.get()) {
                         Objects.requireNonNull(illashooter.getAttribute(Attributes.MAX_HEALTH)).setBaseValue(6.0);
                         illashooter.heal(10);
                     }

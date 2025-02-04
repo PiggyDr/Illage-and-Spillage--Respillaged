@@ -1,7 +1,6 @@
 package com.yellowbrossproductions.illageandspillage;
 
 import com.mojang.logging.LogUtils;
-import com.yellowbrossproductions.illageandspillage.config.Config;
 import com.yellowbrossproductions.illageandspillage.init.ModEntityTypes;
 import com.yellowbrossproductions.illageandspillage.packet.PacketHandler;
 import com.yellowbrossproductions.illageandspillage.particle.ParticleRegisterer;
@@ -16,12 +15,13 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
 import org.slf4j.Logger;
 
 @Mod(IllageAndSpillage.MOD_ID)
@@ -42,8 +42,8 @@ public class IllageAndSpillage {
         PotionRegisterer.POTIONS.register(modEventBus);
         ParticleRegisterer.PARTICLE_TYPES.register(modEventBus);
         CreativeTabRegisterer.TABS.register(modEventBus);
-        Config.loadConfig(Config.client_config, FMLPaths.CONFIGDIR.get().resolve("illageandspillage-client.toml").toString());
-        Config.loadConfig(Config.common_config, FMLPaths.CONFIGDIR.get().resolve("illageandspillage-common.toml").toString());
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.commonSpec);
         PROXY.init(modEventBus);
 
         modEventBus.addListener(this::commonSetup);

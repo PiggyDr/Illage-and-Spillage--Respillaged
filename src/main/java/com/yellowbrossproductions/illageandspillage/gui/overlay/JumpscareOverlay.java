@@ -2,7 +2,7 @@ package com.yellowbrossproductions.illageandspillage.gui.overlay;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +45,7 @@ public class JumpscareOverlay {
     }
 
     public void render(GuiGraphics guiGraphics, float partialTicks, int screenWidth, int screenHeight) {
-        if (!visible || !IllageAndSpillageConfig.doJumpscare.get()) return;
+        if (!visible || !Config.ClientConfig.doJumpscare.get()) return;
 
         float time = progress + partialTicks;
         if (time >= ANIMATION_TOTAL) {

@@ -1,6 +1,6 @@
 package com.yellowbrossproductions.illageandspillage.entities.goal;
 
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.FreakagerEntity;
 import com.yellowbrossproductions.illageandspillage.entities.SpiritcallerEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -22,7 +22,7 @@ public class RunFromIntroBossGoal extends AvoidEntityGoal {
 
     @Override
     public boolean canUse() {
-        if (!IllageAndSpillageConfig.mobs_watch_intros.get()) return false;
+        if (!Config.CommonConfig.mobs_watch_intros.get()) return false;
 
         boolean superUse = super.canUse();
 

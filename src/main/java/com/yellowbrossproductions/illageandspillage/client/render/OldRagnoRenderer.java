@@ -1,7 +1,7 @@
 package com.yellowbrossproductions.illageandspillage.client.render;
 
 import com.yellowbrossproductions.illageandspillage.client.model.OldRagnoModel;
-import com.yellowbrossproductions.illageandspillage.config.IllageAndSpillageConfig;
+import com.yellowbrossproductions.illageandspillage.Config;
 import com.yellowbrossproductions.illageandspillage.entities.OldRagnoEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -30,6 +30,6 @@ public class OldRagnoRenderer extends MobRenderer<OldRagnoEntity, OldRagnoModel<
     }
 
     public ResourceLocation getTextureLocation(OldRagnoEntity p_110775_1_) {
-        return IllageAndSpillageConfig.arachnophobeMode.get() ? ARACHNOPHOBE : (p_110775_1_.isCrazy() ? CRAZY : TEXTURE);
+        return Config.ClientConfig.arachnophobeMode.get() ? ARACHNOPHOBE : (p_110775_1_.isCrazy() ? CRAZY : TEXTURE);
     }
 }
