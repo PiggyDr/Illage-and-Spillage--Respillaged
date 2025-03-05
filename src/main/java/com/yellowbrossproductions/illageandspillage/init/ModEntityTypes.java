@@ -145,7 +145,7 @@ public class ModEntityTypes {
         Ragno = ENTITY_TYPES.register("ragno", () -> Builder.of(RagnoEntity::new, MobCategory.MONSTER).sized(3.2F, 1.8F).build((new ResourceLocation("illageandspillage", "ragno")).toString()));
         Eyesore = ENTITY_TYPES.register("eyesore", () -> Builder.of(EyesoreEntity::new, MobCategory.MONSTER).sized(0.8F, 0.8F).build((new ResourceLocation("illageandspillage", "eyesore")).toString()));
         Funnybone = ENTITY_TYPES.register("funnybone", () -> Builder.of(FunnyboneEntity::new, MobCategory.MONSTER).sized(0.5F, 1.2F).build((new ResourceLocation("illageandspillage", "funnybone")).toString()));
-        Bone = ENTITY_TYPES.register("bone", () -> Builder.<BoneEntity>of(BoneEntity::new, MobCategory.MONSTER).sized(0.5F, 0.1F).build((new ResourceLocation("illageandspillage", "bone")).toString()));
+        Bone = ENTITY_TYPES.register("bone", () -> Builder.<BoneEntity>of(BoneEntity::new, MobCategory.MISC).sized(0.5F, 0.1F).build((new ResourceLocation("illageandspillage", "bone")).toString()));
         SkullBomb = ENTITY_TYPES.register("skull_bomb", () -> Builder.of(SkullBombEntity::new, MobCategory.MONSTER).sized(0.5F, 0.5F).build((new ResourceLocation("illageandspillage", "skull_bomb")).toString()));
         OldFreakager = ENTITY_TYPES.register("old_freakager", () -> Builder.of(OldFreakagerEntity::new, MobCategory.MONSTER).sized(0.6F, 2.3F).build((new ResourceLocation("illageandspillage", "old_freakager")).toString()));
         OldRagno = ENTITY_TYPES.register("old_ragno", () -> Builder.of(OldRagnoEntity::new, MobCategory.MONSTER).sized(3.2F, 1.8F).build((new ResourceLocation("illageandspillage", "old_ragno")).toString()));
@@ -155,7 +155,7 @@ public class ModEntityTypes {
         MagiHeal = ENTITY_TYPES.register("magi_heal", () -> Builder.of(MagiHealEntity::new, MobCategory.MONSTER).sized(0.5F, 0.5F).build((new ResourceLocation("illageandspillage", "magi_heal")).toString()));
         Kaboomer = ENTITY_TYPES.register("kaboomer", () -> Builder.of(KaboomerEntity::new, MobCategory.MONSTER).sized(1.25F, 3.4F).fireImmune().build((new ResourceLocation("illageandspillage", "kaboomer")).toString()));
         PumpkinBomb = ENTITY_TYPES.register("pumpkin_bomb", () -> Builder.of(PumpkinBombEntity::new, MobCategory.MONSTER).sized(0.75F, 0.75F).build((new ResourceLocation("illageandspillage", "pumpkin_bomb")).toString()));
-        Axe = ENTITY_TYPES.register("axe", () -> Builder.<AxeEntity>of(AxeEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "axe")).toString()));
+        Axe = ENTITY_TYPES.register("axe", () -> Builder.<AxeEntity>of(AxeEntity::new, MobCategory.MISC).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "axe")).toString()));
         OldAxe = ENTITY_TYPES.register("old_axe", () -> Builder.of(OldAxeEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "old_axe")).toString()));
         DarkPotion = ENTITY_TYPES.register("dark_potion", () -> Builder.of(DarkPotionEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(1).build((new ResourceLocation("illageandspillage", "dark_potion")).toString()));
         Scythe = ENTITY_TYPES.register("scythe", () -> Builder.of(ScytheEntity::new, MobCategory.MONSTER).sized(0.2F, 0.2F).build((new ResourceLocation("illageandspillage", "scythe")).toString()));
