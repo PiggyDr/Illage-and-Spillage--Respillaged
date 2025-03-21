@@ -42,6 +42,8 @@ import java.util.List;
 public class PreserverEntity extends AbstractIllager {
     private static final EntityDataAccessor<Boolean> TRYING_TO_PROTECT;
     private static final EntityDataAccessor<Integer> JUMP_ANIM_TICKS;
+    private static final int JUMP_TIMEOUT_TICKS = 200; // 10 seconds
+
     private LivingEntity thingToProtect = null;
     private int cooldownTime;
     private LivingEntity entityToParticle;
@@ -76,22 +78,6 @@ public class PreserverEntity extends AbstractIllager {
     }
 
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
-        if (this.isTryingToProtect()) {
-            if (this.getThingToProtect() != null && this.getThingToProtect().isAlive() && this.getThingToProtect().distanceToSqr(this) < 6.0) {
-                this.getThingToProtect().addEffect(new MobEffectInstance(EffectRegisterer.PRESERVED.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false));
-                this.entityToParticle = this.getThingToProtect();
-                this.tickCountWhenProtected = this.getThingToProtect().tickCount;
-            }
-
-            this.setTryingToProtect(false);
-            this.playSound(IllageAndSpillageSoundEvents.ENTITY_PRESERVER_LAND.get(), 1.0F, 1.0F);
-            if (!this.level().isClientSide) {
-                this.setJumpAnimationTick(0);
-            }
-
-            this.cooldownTime = 200;
-        }
-
         return false;
     }
 
@@ -132,18 +118,49 @@ public class PreserverEntity extends AbstractIllager {
             LivingEntity thing = this.getThingToProtect();
             if (this.getThingToProtect() != null) {
                 this.getLookControl().setLookAt(this.getThingToProtect(), 100.0F, 100.0F);
-            }
-
-            if (this.getThingToProtect() != null) {
                 thing.setDeltaMovement(0.0, thing.getDeltaMovement().y, 0.0);
             }
 
             if (this.getJumpAnimationTick() == 20 && this.getThingToProtect() != null) {
                 double multiplier = 0.4;
                 this.setDeltaMovement((thing.getX() - this.getX()) * multiplier, (thing.getY() - this.getY()) * multiplier, (thing.getZ() - this.getZ()) * multiplier);
+
+            } else if (this.getJumpAnimationTick() > 20) {
+                if (this.hasReachedTarget())
+                    finishJump();
+
+                if (this.getJumpAnimationTick() - 20 > JUMP_TIMEOUT_TICKS)
+                    stopJump();
             }
         }
 
+    }
+
+    protected boolean hasReachedTarget() {
+        return this.onGround() ||
+                this.isInFluidType() ||
+                this.isPassenger() ||
+                (this.getThingToProtect() != null && this.getBoundingBox().intersects(this.getThingToProtect().getBoundingBox()));
+    }
+
+    protected void finishJump() {
+        if (this.getThingToProtect() != null && this.getThingToProtect().isAlive() && this.getThingToProtect().distanceToSqr(this) < 6.0) {
+            this.getThingToProtect().addEffect(new MobEffectInstance(EffectRegisterer.PRESERVED.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false));
+            this.entityToParticle = this.getThingToProtect();
+            this.tickCountWhenProtected = this.getThingToProtect().tickCount;
+        }
+
+        this.playSound(IllageAndSpillageSoundEvents.ENTITY_PRESERVER_LAND.get(), 1.0F, 1.0F);
+
+        stopJump();
+    }
+
+    protected void stopJump() {
+        if (!this.level().isClientSide)
+            this.setJumpAnimationTick(0);
+
+        this.setTryingToProtect(false);
+        this.cooldownTime = 200;
     }
 
     public int getJumpAnimationTick() {
@@ -162,6 +179,7 @@ public class PreserverEntity extends AbstractIllager {
         this.entityData.set(TRYING_TO_PROTECT, trying);
     }
 
+    @Nullable
     public LivingEntity getThingToProtect() {
         return this.thingToProtect;
     }
