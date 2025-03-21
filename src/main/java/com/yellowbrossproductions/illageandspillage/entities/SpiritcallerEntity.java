@@ -63,22 +63,22 @@ import java.util.List;
 
 public class SpiritcallerEntity extends AbstractIllager {
     public ServerBossEvent bossEvent;
-    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
-    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
-    private static final EntityDataAccessor<Boolean> ACTIVE;
-    private static final EntityDataAccessor<Integer> WINGS_FRAME;
-    private static final EntityDataAccessor<Boolean> RITUAL;
-    private static final EntityDataAccessor<Boolean> ARMS_UPWARD;
-    private static final EntityDataAccessor<Boolean> SPINNING;
-    private static final EntityDataAccessor<Boolean> PHASED_OUT;
-    private static final EntityDataAccessor<Integer> SOUL_POWER;
-    private static final EntityDataAccessor<Boolean> FAKING;
-    private static final EntityDataAccessor<Boolean> CHARGING;
-    private static final EntityDataAccessor<Boolean> FORCEFIELD;
-    private static final EntityDataAccessor<Boolean> CLAP;
-    private static final EntityDataAccessor<Boolean> SHOW_SPIRIT_HANDS;
-    private static final EntityDataAccessor<Boolean> CHARGING_LASER;
-    private static final EntityDataAccessor<Boolean> SHOOTING_LASER;
+    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ACTIVE = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> WINGS_FRAME = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> RITUAL = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ARMS_UPWARD = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SPINNING = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> PHASED_OUT = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> SOUL_POWER = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> FAKING = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FORCEFIELD = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CLAP = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOW_SPIRIT_HANDS = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CHARGING_LASER = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOOTING_LASER = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
     private float clientSideWingsAnimationO;
     private float clientSideWingsAnimation;
     private int ritualTicks;
@@ -1415,24 +1415,7 @@ public class SpiritcallerEntity extends AbstractIllager {
         this.laserZ = z;
     }
 
-    static {
-        SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        NEARBY_ILLAGERS = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        ACTIVE = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        WINGS_FRAME = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.INT);
-        RITUAL = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        ARMS_UPWARD = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        SPINNING = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        PHASED_OUT = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        SOUL_POWER = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.INT);
-        FAKING = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        CHARGING = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        FORCEFIELD = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        CLAP = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        SHOW_SPIRIT_HANDS = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        CHARGING_LASER = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-        SHOOTING_LASER = SynchedEntityData.defineId(SpiritcallerEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 
     class AntiCheeseGoal extends Goal {
         public boolean canUse() {

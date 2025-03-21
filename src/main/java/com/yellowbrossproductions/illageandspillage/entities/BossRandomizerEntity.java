@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class BossRandomizerEntity extends AbstractIllager {
-    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
+    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(BossRandomizerEntity.class, EntityDataSerializers.BOOLEAN);
 
     public BossRandomizerEntity(EntityType<? extends AbstractIllager> p_i48556_1_, Level p_i48556_2_) {
         super(p_i48556_1_, p_i48556_2_);
@@ -249,9 +249,5 @@ public class BossRandomizerEntity extends AbstractIllager {
 
     public boolean isCustomNameVisible() {
         return true;
-    }
-
-    static {
-        SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(BossRandomizerEntity.class, EntityDataSerializers.BOOLEAN);
     }
 }

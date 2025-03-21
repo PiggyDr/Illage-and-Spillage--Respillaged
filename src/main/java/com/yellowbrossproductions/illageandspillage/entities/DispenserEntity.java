@@ -23,7 +23,7 @@ import java.util.Objects;
 
 public class DispenserEntity extends Monster implements IllagerAttack {
     private final List<IllashooterEntity> shooters = new ArrayList<>();
-    private static final EntityDataAccessor<Boolean> IN_MOTION;
+    private static final EntityDataAccessor<Boolean> IN_MOTION = SynchedEntityData.defineId(DispenserEntity.class, EntityDataSerializers.BOOLEAN);
     private int spawnTicks;
     private Mob owner;
 
@@ -140,9 +140,5 @@ public class DispenserEntity extends Monster implements IllagerAttack {
 
     public void setOwner(Mob owner) {
         this.owner = owner;
-    }
-
-    static {
-        IN_MOTION = SynchedEntityData.defineId(DispenserEntity.class, EntityDataSerializers.BOOLEAN);
     }
 }

@@ -44,10 +44,10 @@ public class SoulBeamEntity extends Entity {
     public boolean on;
     public Direction blockSide;
     private int power;
-    private static final EntityDataAccessor<Float> YAW;
-    private static final EntityDataAccessor<Float> PITCH;
-    private static final EntityDataAccessor<Integer> DURATION;
-    private static final EntityDataAccessor<Integer> CASTER;
+    private static final EntityDataAccessor<Float> YAW = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> PITCH = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> DURATION = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CASTER = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.INT);
     public float prevYaw;
     public float prevPitch;
     @OnlyIn(Dist.CLIENT)
@@ -266,12 +266,7 @@ public class SoulBeamEntity extends Entity {
 
     }
 
-    static {
-        YAW = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.FLOAT);
-        PITCH = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.FLOAT);
-        DURATION = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.INT);
-        CASTER = SynchedEntityData.defineId(SoulBeamEntity.class, EntityDataSerializers.INT);
-    }
+    
 
     public static class SolarbeamHitResult {
         private BlockHitResult blockHit;

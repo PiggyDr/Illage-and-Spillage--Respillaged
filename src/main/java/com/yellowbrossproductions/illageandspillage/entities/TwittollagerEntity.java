@@ -37,14 +37,14 @@ import java.util.EnumSet;
 import java.util.Iterator;
 
 public class TwittollagerEntity extends AbstractIllager {
-    private static final EntityDataAccessor<Boolean> ANGRY;
-    private static final EntityDataAccessor<Boolean> STARING;
-    private static final EntityDataAccessor<Boolean> PHONE_DINGED;
-    private static final EntityDataAccessor<Boolean> HMM;
-    private static final EntityDataAccessor<Boolean> CHECKING_PHONE;
-    private static final EntityDataAccessor<Integer> GRRRRRRRRRRRRR_TICKS;
-    private static final EntityDataAccessor<Boolean> CAN_CHARGE;
-    private static final EntityDataAccessor<Boolean> EXPLODE;
+    private static final EntityDataAccessor<Boolean> ANGRY = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> STARING = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> PHONE_DINGED = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HMM = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CHECKING_PHONE = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> GRRRRRRRRRRRRR_TICKS = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> CAN_CHARGE = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> EXPLODE = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
     private int checkPhoneTicks;
     private int waitTime;
     private boolean isAngry;
@@ -383,16 +383,7 @@ public class TwittollagerEntity extends AbstractIllager {
         }
     }
 
-    static {
-        ANGRY = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-        STARING = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-        PHONE_DINGED = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-        HMM = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-        CHECKING_PHONE = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-        GRRRRRRRRRRRRR_TICKS = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.INT);
-        CAN_CHARGE = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-        EXPLODE = SynchedEntityData.defineId(TwittollagerEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 
     class ChargeAtTargetGoal extends Goal {
         public ChargeAtTargetGoal() {

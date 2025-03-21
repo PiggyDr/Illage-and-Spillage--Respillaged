@@ -61,12 +61,12 @@ import java.util.*;
 public class OldRagnoEntity extends Raider implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final UUID SPEED_PENALTY_UUID = UUID.fromString("5CD17A52-AB9A-42D3-A629-90FDE04B281E");
-    private static final AttributeModifier SPEED_PENALTY;
-    private static final EntityDataAccessor<Byte> DATA_FLAGS_ID;
-    private static final EntityDataAccessor<Integer> ANIMATION_STATE;
-    private static final EntityDataAccessor<Boolean> CRAZY;
-    private static final EntityDataAccessor<Boolean> STUNNED;
-    private static final EntityDataAccessor<Integer> ATTACK_TYPE;
+    private static final AttributeModifier SPEED_PENALTY = new AttributeModifier(SPEED_PENALTY_UUID, "STOP MOVING AROUND STUPID", -0.35, Operation.ADDITION);
+    private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> CRAZY = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> STUNNED = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_TYPE = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.INT);
     public AnimationState introAnimationState = new AnimationState();
     public AnimationState phaseAnimationState = new AnimationState();
     public AnimationState blockAnimationState = new AnimationState();
@@ -1366,14 +1366,7 @@ public class OldRagnoEntity extends Raider implements ICanBeAnimated {
         return this.getAttackType() == 0 && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.attackCooldown < 1 && !this.isStunned() && !this.isPlayingIntro;
     }
 
-    static {
-        ANIMATION_STATE = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.INT);
-        CRAZY = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.BOOLEAN);
-        STUNNED = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.BOOLEAN);
-        ATTACK_TYPE = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.INT);
-        DATA_FLAGS_ID = SynchedEntityData.defineId(OldRagnoEntity.class, EntityDataSerializers.BYTE);
-        SPEED_PENALTY = new AttributeModifier(SPEED_PENALTY_UUID, "STOP MOVING AROUND STUPID", -0.35, Operation.ADDITION);
-    }
+    
 
     class StunGoal extends Goal {
         public StunGoal() {

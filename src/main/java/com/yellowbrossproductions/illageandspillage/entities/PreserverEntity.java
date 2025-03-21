@@ -40,8 +40,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class PreserverEntity extends AbstractIllager {
-    private static final EntityDataAccessor<Boolean> TRYING_TO_PROTECT;
-    private static final EntityDataAccessor<Integer> JUMP_ANIM_TICKS;
+    private static final EntityDataAccessor<Boolean> TRYING_TO_PROTECT = SynchedEntityData.defineId(PreserverEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> JUMP_ANIM_TICKS = SynchedEntityData.defineId(PreserverEntity.class, EntityDataSerializers.INT);
     private LivingEntity thingToProtect = null;
     private int cooldownTime;
     private LivingEntity entityToParticle;
@@ -206,11 +206,6 @@ public class PreserverEntity extends AbstractIllager {
 
     protected float getStandingEyeHeight(Pose p_21131_, EntityDimensions p_21132_) {
         return this.isTryingToProtect() ? 1.125F : 1.75F;
-    }
-
-    static {
-        TRYING_TO_PROTECT = SynchedEntityData.defineId(PreserverEntity.class, EntityDataSerializers.BOOLEAN);
-        JUMP_ANIM_TICKS = SynchedEntityData.defineId(PreserverEntity.class, EntityDataSerializers.INT);
     }
 
     class TryToProtectGoal extends Goal {

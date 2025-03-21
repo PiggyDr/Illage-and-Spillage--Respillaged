@@ -30,7 +30,7 @@ import net.minecraft.world.level.Level;
 import java.util.EnumSet;
 
 public class IllashooterEntity extends Raider {
-    private static final EntityDataAccessor<Boolean> ATTACKING;
+    private static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(IllashooterEntity.class, EntityDataSerializers.BOOLEAN);
     private int attackTicks;
     private Mob owner;
 
@@ -153,10 +153,6 @@ public class IllashooterEntity extends Raider {
 
     public boolean canBeLeader() {
         return false;
-    }
-
-    static {
-        ATTACKING = SynchedEntityData.defineId(IllashooterEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
     class AttackGoal extends Goal {

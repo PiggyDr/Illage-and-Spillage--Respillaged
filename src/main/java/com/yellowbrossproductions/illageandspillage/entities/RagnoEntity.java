@@ -68,15 +68,15 @@ import java.util.*;
 public class RagnoEntity extends Raider implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
     private static final UUID SPEED_PENALTY_UUID = UUID.fromString("5CD17A52-AB9A-42D3-A629-90FDE04B281E");
-    private static final AttributeModifier SPEED_PENALTY;
-    private static final EntityDataAccessor<Byte> DATA_FLAGS_ID;
-    private static final EntityDataAccessor<Integer> ANIMATION_STATE;
-    private static final EntityDataAccessor<Boolean> CRAZY;
+    private static final AttributeModifier SPEED_PENALTY = new AttributeModifier(SPEED_PENALTY_UUID, "STOP MOVING AROUND STUPID", -0.35, Operation.ADDITION);
+    private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> CRAZY = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> BURROWING = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> GRABBING = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> STUN_HEALTH = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> STUNNED;
-    private static final EntityDataAccessor<Integer> ATTACK_TYPE;
+    private static final EntityDataAccessor<Boolean> STUNNED = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_TYPE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> ATTACK_TICKS = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> RAGNO_FACE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SHAKE_MULTIPLIER = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
@@ -2311,14 +2311,7 @@ public class RagnoEntity extends Raider implements ICanBeAnimated {
         return this.getAttackType() == 0 && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.attackCooldown < 1 && !this.isStunned() && !this.isPlayingIntro && !this.isPlayingPhase && !this.isAnticheese() && this.halfHealth() && this.breathCooldown < 1 && this.isCrazy() && this.distanceToSqr(this.getTarget()) < 36.0;
     }
 
-    static {
-        ANIMATION_STATE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
-        CRAZY = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
-        STUNNED = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BOOLEAN);
-        ATTACK_TYPE = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.INT);
-        DATA_FLAGS_ID = SynchedEntityData.defineId(RagnoEntity.class, EntityDataSerializers.BYTE);
-        SPEED_PENALTY = new AttributeModifier(SPEED_PENALTY_UUID, "STOP MOVING AROUND STUPID", -0.35, Operation.ADDITION);
-    }
+    
 
     class StunGoal extends Goal {
         public StunGoal() {

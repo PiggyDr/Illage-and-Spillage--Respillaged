@@ -43,10 +43,10 @@ import java.util.Iterator;
 public class IgniterEntity extends AbstractIllager {
     public static final int FIREBALLS_TO_OVERHEAT = 25;
     public static final int COOLDOWN_TIME = 300;
-    private static final EntityDataAccessor<Boolean> ATTACKING;
-    private static final EntityDataAccessor<Boolean> TORCH_BURNT_OUT;
-    private static final EntityDataAccessor<Float> FIREBALLS_SHOT;
-    private static final EntityDataAccessor<Float> COOLDOWN_TICKS;
+    private static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> TORCH_BURNT_OUT = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Float> FIREBALLS_SHOT = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> COOLDOWN_TICKS = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.FLOAT);
     private int shootTicks;
     private int fireballTimer;
 
@@ -267,13 +267,6 @@ public class IgniterEntity extends AbstractIllager {
             this.playSound(this.getCelebrateSound(), 1.0F, 1.0F);
         }
         return super.killedEntity(level, entity);
-    }
-
-    static {
-        ATTACKING = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.BOOLEAN);
-        TORCH_BURNT_OUT = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.BOOLEAN);
-        FIREBALLS_SHOT = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.FLOAT);
-        COOLDOWN_TICKS = SynchedEntityData.defineId(IgniterEntity.class, EntityDataSerializers.FLOAT);
     }
 
     class ShootFireballsGoal extends Goal {

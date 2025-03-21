@@ -33,10 +33,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TrickOrTreatEntity extends PathfinderMob implements IllagerAttack {
-    private static final EntityDataAccessor<Integer> TREAT;
-    private static final EntityDataAccessor<Boolean> BOUNCE;
-    private static final EntityDataAccessor<Boolean> GOOPY;
-    private static final EntityDataAccessor<Boolean> OLD;
+    private static final EntityDataAccessor<Integer> TREAT = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> BOUNCE = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> GOOPY = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> OLD = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.BOOLEAN);
     private LivingEntity owner;
     public int circleTime;
     public int bounceTime;
@@ -360,10 +360,5 @@ public class TrickOrTreatEntity extends PathfinderMob implements IllagerAttack {
         }
     }
 
-    static {
-        TREAT = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.INT);
-        BOUNCE = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.BOOLEAN);
-        GOOPY = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.BOOLEAN);
-        OLD = SynchedEntityData.defineId(TrickOrTreatEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 }

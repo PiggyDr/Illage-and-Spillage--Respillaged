@@ -20,7 +20,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 
 public class SkullBombEntity extends PathfinderMob implements IllagerAttack {
-    private static final EntityDataAccessor<Boolean> IS_SMALL;
+    private static final EntityDataAccessor<Boolean> IS_SMALL = SynchedEntityData.defineId(SkullBombEntity.class, EntityDataSerializers.BOOLEAN);
     private LivingEntity owner;
     private int oldSwell;
     private int swell;
@@ -163,7 +163,5 @@ public class SkullBombEntity extends PathfinderMob implements IllagerAttack {
         super.die(p_21014_);
     }
 
-    static {
-        IS_SMALL = SynchedEntityData.defineId(SkullBombEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 }

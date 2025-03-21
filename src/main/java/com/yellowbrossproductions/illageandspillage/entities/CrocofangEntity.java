@@ -43,10 +43,10 @@ import java.util.*;
 
 public class CrocofangEntity extends Raider implements ICanBeAnimated {
     private static final UUID SPEED_PENALTY_UUID = UUID.fromString("5BD14A52-AB9A-42D3-A649-90FDE044281E");
-    private static final AttributeModifier SPEED_PENALTY;
-    private static final EntityDataAccessor<Integer> ANIMATION_STATE;
-    private static final EntityDataAccessor<Boolean> TRIED_SPAWN;
-    private static final EntityDataAccessor<Boolean> CHARGING;
+    private static final AttributeModifier SPEED_PENALTY = new AttributeModifier(SPEED_PENALTY_UUID, "STOP MOVING AROUND STUPID", -0.35, Operation.ADDITION);
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(CrocofangEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> TRIED_SPAWN = SynchedEntityData.defineId(CrocofangEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(CrocofangEntity.class, EntityDataSerializers.BOOLEAN);
     public AnimationState attackAnimationState = new AnimationState();
     public AnimationState prechargeAnimationState = new AnimationState();
     public AnimationState chargeAnimationState = new AnimationState();
@@ -387,13 +387,6 @@ public class CrocofangEntity extends Raider implements ICanBeAnimated {
 
     public boolean hurt(DamageSource p_37849_, float p_37850_) {
         return !this.getPassengers().contains(p_37849_.getEntity()) && super.hurt(p_37849_, p_37850_);
-    }
-
-    static {
-        ANIMATION_STATE = SynchedEntityData.defineId(CrocofangEntity.class, EntityDataSerializers.INT);
-        TRIED_SPAWN = SynchedEntityData.defineId(CrocofangEntity.class, EntityDataSerializers.BOOLEAN);
-        CHARGING = SynchedEntityData.defineId(CrocofangEntity.class, EntityDataSerializers.BOOLEAN);
-        SPEED_PENALTY = new AttributeModifier(SPEED_PENALTY_UUID, "STOP MOVING AROUND STUPID", -0.35, Operation.ADDITION);
     }
 
     class StunGoal extends Goal {

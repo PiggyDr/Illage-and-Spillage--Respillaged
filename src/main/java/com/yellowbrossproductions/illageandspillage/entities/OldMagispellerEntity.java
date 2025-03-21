@@ -61,16 +61,16 @@ import java.util.*;
 public class OldMagispellerEntity extends AbstractIllager {
     public ServerBossEvent bossEvent;
     private final List<FakeMagispellerEntity> clones = new ArrayList<>();
-    private static final EntityDataAccessor<Boolean> FAKING;
-    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
-    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
-    private static final EntityDataAccessor<Boolean> WAVING_ARMS;
-    private static final EntityDataAccessor<Boolean> SPINNING;
-    private static final EntityDataAccessor<Boolean> VINDICATOR_ATTACKING;
-    private static final EntityDataAccessor<Boolean> CROSSBOW_ATTACKING;
-    private static final EntityDataAccessor<Boolean> FORCEFIELD;
-    private static final EntityDataAccessor<Boolean> WEEEEEEEEEEEE;
-    private static final EntityDataAccessor<Boolean> ACTIVE;
+    private static final EntityDataAccessor<Boolean> FAKING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> WAVING_ARMS = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SPINNING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> VINDICATOR_ATTACKING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CROSSBOW_ATTACKING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FORCEFIELD = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> WEEEEEEEEEEEE = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ACTIVE = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
     private int attackTicks;
     private int attackType;
     private final int CLONES_ATTACK = 1;
@@ -885,18 +885,7 @@ public class OldMagispellerEntity extends AbstractIllager {
         }
     }
 
-    static {
-        FAKING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        NEARBY_ILLAGERS = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        WAVING_ARMS = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        SPINNING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        VINDICATOR_ATTACKING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        CROSSBOW_ATTACKING = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        FORCEFIELD = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        WEEEEEEEEEEEE = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        ACTIVE = SynchedEntityData.defineId(OldMagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 
     class RavagerGoal extends Goal {
         public RavagerGoal() {

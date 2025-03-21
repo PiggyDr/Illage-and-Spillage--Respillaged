@@ -18,10 +18,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkHooks;
 
 public class CameraShakeEntity extends Entity {
-    private static final EntityDataAccessor<Float> RADIUS;
-    private static final EntityDataAccessor<Float> MAGNITUDE;
-    private static final EntityDataAccessor<Integer> DURATION;
-    private static final EntityDataAccessor<Integer> FADE_DURATION;
+    private static final EntityDataAccessor<Float> RADIUS = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> MAGNITUDE = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> DURATION = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> FADE_DURATION = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.INT);
 
     public CameraShakeEntity(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
@@ -119,12 +119,5 @@ public class CameraShakeEntity extends Entity {
             world.addFreshEntity(cameraShake);
         }
 
-    }
-
-    static {
-        RADIUS = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.FLOAT);
-        MAGNITUDE = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.FLOAT);
-        DURATION = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.INT);
-        FADE_DURATION = SynchedEntityData.defineId(CameraShakeEntity.class, EntityDataSerializers.INT);
     }
 }

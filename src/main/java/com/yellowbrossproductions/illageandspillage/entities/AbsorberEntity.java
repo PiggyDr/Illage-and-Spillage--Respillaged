@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class AbsorberEntity extends AbstractIllager implements ICanBeAnimated {
-    private static final EntityDataAccessor<Integer> ATTACK_TICKS;
-    private static final EntityDataAccessor<Integer> ANIMATION_STATE;
+    private static final EntityDataAccessor<Integer> ATTACK_TICKS = SynchedEntityData.defineId(AbsorberEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(AbsorberEntity.class, EntityDataSerializers.INT);
     public AnimationState attackAnimationState = new AnimationState();
     public AnimationState deathAnimationState = new AnimationState();
 
@@ -234,11 +234,6 @@ public class AbsorberEntity extends AbstractIllager implements ICanBeAnimated {
 
     public boolean canBeLeader() {
         return false;
-    }
-
-    static {
-        ATTACK_TICKS = SynchedEntityData.defineId(AbsorberEntity.class, EntityDataSerializers.INT);
-        ANIMATION_STATE = SynchedEntityData.defineId(AbsorberEntity.class, EntityDataSerializers.INT);
     }
 
     class AttackGoal extends Goal {

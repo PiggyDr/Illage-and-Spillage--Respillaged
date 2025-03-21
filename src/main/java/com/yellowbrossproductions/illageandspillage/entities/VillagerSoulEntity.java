@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.network.PacketDistributor;
 
 public class VillagerSoulEntity extends PathfinderMob {
-    private static final EntityDataAccessor<Boolean> CHARGING;
+    private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(VillagerSoulEntity.class, EntityDataSerializers.BOOLEAN);
     private int attackTicks;
     double chargeX;
     double chargeY;
@@ -137,7 +137,5 @@ public class VillagerSoulEntity extends PathfinderMob {
         this.entityData.set(CHARGING, charge);
     }
 
-    static {
-        CHARGING = SynchedEntityData.defineId(VillagerSoulEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 }

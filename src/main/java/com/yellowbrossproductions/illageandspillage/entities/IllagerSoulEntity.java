@@ -24,8 +24,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class IllagerSoulEntity extends Monster {
-    private static final EntityDataAccessor<Boolean> CHARGING;
-    private static final EntityDataAccessor<Boolean> ANGEL_OR_DEVIL;
+    private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(IllagerSoulEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ANGEL_OR_DEVIL = SynchedEntityData.defineId(IllagerSoulEntity.class, EntityDataSerializers.BOOLEAN);
     private LivingEntity owner;
     private int attackTicks;
     double chargeX;
@@ -222,11 +222,6 @@ public class IllagerSoulEntity extends Monster {
 
     protected SoundEvent getDeathSound() {
         return null;
-    }
-
-    static {
-        CHARGING = SynchedEntityData.defineId(IllagerSoulEntity.class, EntityDataSerializers.BOOLEAN);
-        ANGEL_OR_DEVIL = SynchedEntityData.defineId(IllagerSoulEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
     class LookAtTargetGoal extends Goal {

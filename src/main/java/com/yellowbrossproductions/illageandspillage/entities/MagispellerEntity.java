@@ -77,20 +77,20 @@ import java.util.*;
 
 public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
-    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
-    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
-    private static final EntityDataAccessor<Boolean> ACTIVE;
-    private static final EntityDataAccessor<Boolean> SHOW_ARMS;
-    private static final EntityDataAccessor<Integer> GLOW_STATE;
-    private static final EntityDataAccessor<Integer> SHAKE_AMOUNT;
-    private static final EntityDataAccessor<Boolean> FAKING;
-    private static final EntityDataAccessor<Integer> ARROW_STATE;
-    private static final EntityDataAccessor<Boolean> WAVING_ARMS;
-    private static final EntityDataAccessor<Boolean> BALLOON;
-    private static final EntityDataAccessor<Boolean> DEATH;
-    private static final EntityDataAccessor<Integer> ANIMATION_STATE;
-    private static final EntityDataAccessor<Integer> ATTACK_TYPE;
-    private static final EntityDataAccessor<Integer> ATTACK_TICKS;
+    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ACTIVE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOW_ARMS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> GLOW_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> SHAKE_AMOUNT = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> FAKING = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ARROW_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> WAVING_ARMS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> BALLOON = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DEATH = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ATTACK_TYPE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ATTACK_TICKS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
     public AnimationState fireballAnimationState = new AnimationState();
     public AnimationState lifestealAnimationState = new AnimationState();
     public AnimationState fakersAnimationState = new AnimationState();
@@ -2135,23 +2135,6 @@ public class MagispellerEntity extends AbstractIllager implements ICanBeAnimated
         this.knockbackAnimationState.stop();
         this.kaboomerAnimationState.stop();
         this.deathAnimationState.stop();
-    }
-
-    static {
-        NEARBY_ILLAGERS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        ACTIVE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        SHOW_ARMS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        GLOW_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
-        SHAKE_AMOUNT = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
-        FAKING = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        ARROW_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
-        WAVING_ARMS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        BALLOON = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        DEATH = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.BOOLEAN);
-        ANIMATION_STATE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
-        ATTACK_TYPE = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
-        ATTACK_TICKS = SynchedEntityData.defineId(MagispellerEntity.class, EntityDataSerializers.INT);
     }
 
     class KaboomerGoal extends Goal {

@@ -27,7 +27,7 @@ import net.minecraftforge.fluids.FluidType;
 import java.util.Objects;
 
 public class CrashagerEntity extends Monster implements IllagerAttack {
-    private static final EntityDataAccessor<Integer> ATTACKSTAGE;
+    private static final EntityDataAccessor<Integer> ATTACKSTAGE = SynchedEntityData.defineId(CrashagerEntity.class, EntityDataSerializers.INT);
     private int spawnTicks;
     private Mob owner;
     private double targetX;
@@ -197,10 +197,6 @@ public class CrashagerEntity extends Monster implements IllagerAttack {
 
     public void setAttackStage(int attackStage) {
         this.entityData.set(ATTACKSTAGE, attackStage);
-    }
-
-    static {
-        ATTACKSTAGE = SynchedEntityData.defineId(CrashagerEntity.class, EntityDataSerializers.INT);
     }
 
     class AttackGoal extends Goal {

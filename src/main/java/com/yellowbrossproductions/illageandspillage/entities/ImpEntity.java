@@ -22,8 +22,8 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public class ImpEntity extends Mob implements IllagerAttack {
-    private static final EntityDataAccessor<Integer> STAGE;
-    private static final EntityDataAccessor<Integer> WAIT;
+    private static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(ImpEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> WAIT = SynchedEntityData.defineId(ImpEntity.class, EntityDataSerializers.INT);
     int power;
     private LivingEntity owner;
     private boolean isPlayerOwned;
@@ -205,10 +205,5 @@ public class ImpEntity extends Mob implements IllagerAttack {
 
     public void setPlayerOwned(boolean playerOwned) {
         this.isPlayerOwned = playerOwned;
-    }
-
-    static {
-        STAGE = SynchedEntityData.defineId(ImpEntity.class, EntityDataSerializers.INT);
-        WAIT = SynchedEntityData.defineId(ImpEntity.class, EntityDataSerializers.INT);
     }
 }

@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public class PumpkinBombEntity extends PathfinderMob implements IllagerAttack {
-    private static final EntityDataAccessor<Boolean> GOOPY;
+    private static final EntityDataAccessor<Boolean> GOOPY = SynchedEntityData.defineId(PumpkinBombEntity.class, EntityDataSerializers.BOOLEAN);
     private LivingEntity owner;
     private int oldSwell;
     private int swell;
@@ -169,7 +169,5 @@ public class PumpkinBombEntity extends PathfinderMob implements IllagerAttack {
         super.die(p_21014_);
     }
 
-    static {
-        GOOPY = SynchedEntityData.defineId(PumpkinBombEntity.class, EntityDataSerializers.BOOLEAN);
-    }
+    
 }

@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 public class KaboomerEntity extends Monster implements IllagerAttack {
-    private static final EntityDataAccessor<Integer> ATTACKSTAGE;
+    private static final EntityDataAccessor<Integer> ATTACKSTAGE = SynchedEntityData.defineId(KaboomerEntity.class, EntityDataSerializers.INT);
     private int spawnTicks;
     private Mob owner;
     private int oldSwell;
@@ -282,10 +282,6 @@ public class KaboomerEntity extends Monster implements IllagerAttack {
 
     public void setAttackStage(int attackStage) {
         this.entityData.set(ATTACKSTAGE, attackStage);
-    }
-
-    static {
-        ATTACKSTAGE = SynchedEntityData.defineId(KaboomerEntity.class, EntityDataSerializers.INT);
     }
 
     class AttackGoal extends Goal {

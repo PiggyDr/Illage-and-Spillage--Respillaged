@@ -30,8 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SpiritHandEntity extends PathfinderMob implements IllagerAttack {
-    private static final EntityDataAccessor<Boolean> GOOD_OR_EVIL;
-    private static final EntityDataAccessor<Integer> ATTACK_TYPE;
+    private static final EntityDataAccessor<Boolean> GOOD_OR_EVIL = SynchedEntityData.defineId(SpiritHandEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_TYPE = SynchedEntityData.defineId(SpiritHandEntity.class, EntityDataSerializers.INT);
     private LivingEntity owner;
     private boolean attacking = false;
     private int attackTicks;
@@ -372,10 +372,7 @@ public class SpiritHandEntity extends PathfinderMob implements IllagerAttack {
 
     }
 
-    static {
-        GOOD_OR_EVIL = SynchedEntityData.defineId(SpiritHandEntity.class, EntityDataSerializers.BOOLEAN);
-        ATTACK_TYPE = SynchedEntityData.defineId(SpiritHandEntity.class, EntityDataSerializers.INT);
-    }
+    
 
     class AlwaysWatchTargetGoal extends Goal {
         public AlwaysWatchTargetGoal() {

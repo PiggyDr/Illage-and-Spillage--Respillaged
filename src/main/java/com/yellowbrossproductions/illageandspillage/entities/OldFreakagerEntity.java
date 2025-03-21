@@ -56,14 +56,14 @@ import java.util.*;
 
 public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimated {
     public ServerBossEvent bossEvent;
-    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF;
-    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS;
-    private static final EntityDataAccessor<Boolean> ACTIVE;
-    private static final EntityDataAccessor<Integer> ANIMATION_STATE;
-    private static final EntityDataAccessor<Boolean> SHOW_ARMS;
-    private static final EntityDataAccessor<Boolean> SHOW_VILLAGER;
-    private static final EntityDataAccessor<Integer> VILLAGER_FACE;
-    private static final EntityDataAccessor<Boolean> SCYTHE;
+    private static final EntityDataAccessor<Boolean> SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> NEARBY_ILLAGERS = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ACTIVE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ANIMATION_STATE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> SHOW_ARMS = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOW_VILLAGER = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> VILLAGER_FACE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> SCYTHE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
     private int introTicks;
     public AnimationState introAnimationState = new AnimationState();
     public AnimationState laughAnimationState = new AnimationState();
@@ -1103,17 +1103,6 @@ public class OldFreakagerEntity extends AbstractIllager implements ICanBeAnimate
 
     public boolean doesAttackMeetNormalRequirements() {
         return this.attackType == 0 && !this.areIllagersNearby() && this.getTarget() != null && this.hasLineOfSight(this.getTarget()) && this.isActive() && this.attackCooldown < 1;
-    }
-
-    static {
-        SHOULD_DELETE_ITSELF = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
-        NEARBY_ILLAGERS = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
-        ACTIVE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
-        ANIMATION_STATE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.INT);
-        SHOW_ARMS = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
-        SHOW_VILLAGER = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
-        VILLAGER_FACE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.INT);
-        SCYTHE = SynchedEntityData.defineId(OldFreakagerEntity.class, EntityDataSerializers.BOOLEAN);
     }
 
     class TrickOrTreatGoal extends Goal {

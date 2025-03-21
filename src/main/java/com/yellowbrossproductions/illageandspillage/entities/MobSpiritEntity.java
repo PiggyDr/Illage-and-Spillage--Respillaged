@@ -32,8 +32,8 @@ import net.minecraft.world.level.block.Blocks;
 import java.util.Objects;
 
 public class MobSpiritEntity extends Monster {
-    private static final EntityDataAccessor<Boolean> GOOD_OR_EVIL;
-    private static final EntityDataAccessor<Boolean> SPIRITCALLER;
+    private static final EntityDataAccessor<Boolean> GOOD_OR_EVIL = SynchedEntityData.defineId(MobSpiritEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SPIRITCALLER = SynchedEntityData.defineId(MobSpiritEntity.class, EntityDataSerializers.BOOLEAN);
     private LivingEntity owner;
     private LivingEntity originalMob;
     private int attackTicks;
@@ -217,10 +217,5 @@ public class MobSpiritEntity extends Monster {
             super.handleEntityEvent(p_21375_);
         }
 
-    }
-
-    static {
-        GOOD_OR_EVIL = SynchedEntityData.defineId(MobSpiritEntity.class, EntityDataSerializers.BOOLEAN);
-        SPIRITCALLER = SynchedEntityData.defineId(MobSpiritEntity.class, EntityDataSerializers.BOOLEAN);
     }
 }
